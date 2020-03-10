@@ -1,0 +1,80 @@
+
+.tag {
+    background:#17a2b8;
+    border-color: #17a2b8;
+}
+
+html, body, #app {
+    margin: auto;
+    width: 100%;
+    height: 100%;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+}
+
+#site {
+    flex: 1;
+    width: 100%;
+    padding: 5px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+#queries {
+    flex: 1;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    background-color: paleturquoise;
+}
+
+.query {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 5px;
+    margin-right: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.anyall-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.picker {
+    display: flex;
+    flex-direction: column;
+}
+
+.picker-item {
+    flex: 1;
+}
+
+.query-title {
+    margin: auto;
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none;
+    font-family: "Lucida Console"
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#cards {
+    flex: 4;
+    margin: 5px;
+    background-color: palevioletred;
+}

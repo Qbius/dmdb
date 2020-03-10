@@ -1,21 +1,120 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My first Vue app</title>
-  <script src="https://unpkg.com/vue"></script>
-</head>
-<body>
-  <div id="app">
-    {{ message }}
-  </div>
+    <title>My first Vue app</title>
 
-  <script>
-    var app = new Vue({
-      el: '#app',
-      data: {
-        message: 'Whatever!'
-      }
-    })
-  </script>
+    <script src="lib/vue.min.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.min.js"></script>
+    <link rel="stylesheet" href="lib/tagsinput.css"/>
+    <script src="lib/tagsinput.js"></script>
+   </head>
+<body>
+<div id="app">
+<!--
+    TEMPLATES
+    TEMPLATES
+    TEMPLATES
+-->
+
+    <!--
+        ANY|ALL
+        Has a slot
+    -->
+    <script type='text/x-template' id='anyall'>
+        <div class="query">
+            <div class="anyall-buttons">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-outline-secondary btn-sm active">
+                        <input type="radio" checked autocomplete="off" ><font size="1">ANY</font></input>
+                    </label>
+                    <label class="btn btn-outline-secondary btn-sm">
+                        <input type="radio" checked autocomplete="off" ><font size="1">ALL</font></input>
+                    </label>
+                </div>
+            </div>
+            <div class="anyall-item">
+                <slot>A multi-input or a picker</slot>
+            </div>
+        </div>
+    </script>
+
+    <!--
+        PICKER
+        param: opts
+        An array of objects with the "text" and "class" properties set
+    -->
+    <script type='text/x-template' id='picker'>
+        <div class="picker">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label v-for='opt in opts' class="picker-item" :class="'btn ' + opt.class">
+                    <input type="checkbox" checked autocomplete="off" :id="'toggle_' + opt.text">{{ opt.text }}</input>
+                </label>
+            </div>
+        </div>
+    </script>
+
+    <!--
+        SLIDER
+        param: points
+        An array of numbers at which the slider points should be located
+    -->
+
+    <script type='text/x-template' id='slider'>
+        <div class="slider-container">
+            <input type="text" data-provide="slider" data-slider-tooltip="always" :data-slider-value="'[' + Math.min(...points) + ', ' + Math.max(...points) + ']'"/>
+        </div>
+    </script>
+
+<!--
+    END TEMPLATES
+    END TEMPLATES
+    END TEMPLATES
+-->
+
+    <div id="site">
+        <div id="queries">
+            
+            <anyall>
+                <input id="form-tags-1" name="tags-1" type="text">
+            </anyall>
+
+            <anyall>
+                <picker :opts="civs"></picker>
+            </anyall>
+
+            <div class="query">
+                <picker :opts="types"></picker>
+            </div>
+
+            <div class="query">
+                <div class="query-title">COST</div>
+                <slider :points="cost_points"></slider>
+            </div>
+
+            <div class="query">
+                <div class="query-title">POWER</div>
+                <slider :points="power_points"></slider>
+            </div>
+
+            <div class="query">
+                <div class="query-title">SET</div>
+                <slider :points="set_points"></slider>
+            </div>
+
+        </div>
+
+        <div id="cards">
+        </div>
+
+    </div>
+</div>
+
+    <script src="index.js"></script>
+
 </body>
 </html>
