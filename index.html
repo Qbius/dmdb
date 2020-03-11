@@ -27,7 +27,7 @@
     -->
     <script type='text/x-template' id='tags'>
         <div>
-            <b-form-tags @input="modi()" input-id="tags-basic" v-model="modelvar.tags"/> 
+            <b-form-tags @input="modi()" input-id="tags-pills" v-model="modelvar.tags" tag-variant="secondary" tag-pills size="sm" placeholder="Name, race, effect..."/> 
         </div>
     </script>
 
@@ -38,14 +38,8 @@
     <script type='text/x-template' id='anyall'>
         <div class="query">
             <div class="anyall-buttons">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <label class="btn btn-outline-secondary btn-sm active">
-                        <input type="radio" checked autocomplete="off" ><font size="1">ANY</font></input>
-                    </label>
-                    <label class="btn btn-outline-secondary btn-sm">
-                        <input type="radio" checked autocomplete="off" ><font size="1">ALL</font></input>
-                    </label>
-                </div>
+                <h6><b-badge pill>{{ modelvar.state ? "ALL" : "ANY" }}</b-badge></h6>
+                <b-form-checkbox @input="modi()" v-model="modelvar.state" name="check-button" switch/>
             </div>
             <div class="anyall-item">
                 <slot>A multi-input or a picker</slot>
@@ -59,12 +53,8 @@
         An array of objects with the "text" and "class" properties set
     -->
     <script type='text/x-template' id='picker'>
-        <div class="picker">
-            <b-form-group>
-                <b-button-group>
-                    <b-form-checkbox @input="modi()" v-for="opt in opts" v-model="modelvar[opt.value]" name="whatever" button :button-variant="opt.variant">{{opt.text}}</b-form-checkbox>
-                </b-button-group>
-            </b-form-group>
+        <div class="picker-container">
+            <b-form-checkbox class="picker-item" @input="modi()" v-for="opt in opts" v-model="modelvar[opt.value]" name="whatever" size="sm" button :button-variant="opt.variant">{{opt.text}}</b-form-checkbox>
         </div>
     </script>
 
@@ -89,8 +79,8 @@
             </div>
             <div class="slider-proper">
                 <b-form-input ref="background_slider" class="corer" style="position: absolute; z-index: 1;" type="range" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
-                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.lower" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
-                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.upper" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" @input="update()" @change="instantupdate()" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.lower" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" @input="update()" @change="instantupdate()" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.upper" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
             </div>
         </div>
     </script>
@@ -104,11 +94,11 @@
     <div id="site">
         <div id="queries">
             
-            <anyall>
+            <anyall :modi="heh" :modelvar="tagsanyall">
                 <tags :modi="heh" :modelvar="tagsmodel"/>
             </anyall>
 
-            <anyall>
+            <anyall :modi="heh" :modelvar="civsanyall">
                 <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
             </anyall>
 
@@ -128,15 +118,12 @@
                 <slider :modi="heh" :modelvar="setmodel" title="SET" :points="set_points"></slider>
             </div>
 
-
-            <div class="query">
-                <input type="button" @click="show()">hehe</input>
+            <div style="padding: 5px;">
+                <b-button block @click="reset()">RESET</b-button>
             </div>
-
         </div>
 
-        <div id="cards">
-        </div>
+        <div id="cards"/>
 
     </div>
 </div>
