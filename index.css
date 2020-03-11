@@ -24,6 +24,7 @@ html, body, #app {
     padding: 5px;
     margin: auto;
     display: flex;
+    max-height: 100vh;
     justify-content: space-between;
 }
 
@@ -146,6 +147,12 @@ input[class='corer custom-range']::-moz-range-track {
     margin: 5px;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
+    overflow-y: scroll;
+}
+
+#cards::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .card-image {
