@@ -206,6 +206,7 @@ input[class='corer custom-range']::-moz-range-track {
     align-items: flex-start;
     align-content: flex-start;
     margin: 1px;
+    scrollbar-width: none;
 }
 
 #cards::-webkit-scrollbar {

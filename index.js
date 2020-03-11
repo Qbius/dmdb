@@ -112,10 +112,18 @@ var app = new Vue({
             this.costmodel = {lower: "1", upper: "13"},
             this.powermodel = {lower: "0", upper: "15000"},
             this.setmodel = {lower: "1", upper: "12"}
+            this.heh();
+            console.log(this);
         },
         heh() {
 
             const enabled_civs = Object.keys(this.civmodel).map(key => this.civmodel[key]).some(v => v) ? Object.keys(this.civmodel).filter(key => this.civmodel[key]) : Object.keys(this.civmodel);
+
+            const lower_power = Math.min(this.powermodel.lower, this.powermodel.upper);
+            const upper_power = Math.max(this.powermodel.lower, this.powermodel.upper);
+            const power_modified = (this.power_points[0] != lower_power) || (this.power_points[1] != upper_power)
+            const powrok = !power_modified || (tcg["aqua hulcus"]["power"] && tcg["aqua hulcus"]["power"] >= lower_power && tcg["aqua hulcus"]["power"] <= upper_power);
+            console.log(power_modified);
             
             $("#cards").html(Object.keys(tcg).filter(key => {
                 const{"civilization": cardcivs, "card type": cardtype, "mana cost": cardcost, "effect": cardeffe, "rarity": cardrari, "set": cardsets} = tcg[key];
@@ -127,12 +135,12 @@ var app = new Vue({
 
                 const typeok = !Object.values(this.typmodel).some(v => v) || this.typmodel[cardtype.split(' ')[0]];
                 const costok = cardcost >= Math.min(this.costmodel.lower, this.costmodel.upper) && cardcost <= Math.max(this.costmodel.lower, this.costmodel.upper);
-                const setsok = cardsets.map(dmset => Math.round(dmset.replace('dm-', '').split(':')[0])).every(setnr => setnr >= Math.min(this.setmodel.lower, this.setmodel.upper) && setnr <= Math.max(this.setmodel.lower, this.setmodel.upper));
+                const setsok = cardsets.map(dmset => Math.round(dmset.replace('dm-', '').split(':')[0])).some(setnr => setnr >= Math.min(this.setmodel.lower, this.setmodel.upper) && setnr <= Math.max(this.setmodel.lower, this.setmodel.upper));
                 
                 const lower_power = Math.min(this.powermodel.lower, this.powermodel.upper);
                 const upper_power = Math.max(this.powermodel.lower, this.powermodel.upper);
                 const power_modified = (this.power_points[0] != lower_power) || (this.power_points[1] != upper_power)
-                const powrok = !power_modified || (tcg[key]["power"] && tcg[key]["power"] >= power_lower && tcg[key]["power"] <= power_upper);
+                const powrok = !power_modified || (tcg[key]["power"] && tcg[key]["power"] >= lower_power && tcg[key]["power"] <= upper_power);
 
                 const tag_checking_f = tag => key.includes(tag) || cardeffe.some(eff => eff.includes(tag)) || (tcg[key]["race"] && tcg[key]["race"].some(race => race.includes(tag)));
                 const processed_tags = this.tagsmodel.rows.filter(row => row.length > 0);
