@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My first Vue app</title>
+    <title>DMDB</title>
 
-    <script src="lib/vue.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
     <link rel="stylesheet" href="index.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"/>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.min.js"></script>
-    <link rel="stylesheet" href="lib/tagsinput.css"/>
-    <script src="lib/tagsinput.js"></script>
    </head>
 <body>
 <div id="app">
@@ -20,6 +21,15 @@
     TEMPLATES
     TEMPLATES
 -->
+
+    <!--
+        TAGS
+    -->
+    <script type='text/x-template' id='tags'>
+        <div>
+            <b-form-tags @input="modi()" input-id="tags-basic" v-model="modelvar.tags"/> 
+        </div>
+    </script>
 
     <!--
         ANY|ALL
@@ -50,11 +60,11 @@
     -->
     <script type='text/x-template' id='picker'>
         <div class="picker">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label v-for='opt in opts' class="picker-item" :class="'btn ' + opt.class">
-                    <input type="checkbox" checked autocomplete="off" :id="'toggle_' + opt.text">{{ opt.text }}</input>
-                </label>
-            </div>
+            <b-form-group>
+                <b-button-group>
+                    <b-form-checkbox @input="modi()" v-for="opt in opts" v-model="modelvar[opt.value]" name="whatever" button :button-variant="opt.variant">{{opt.text}}</b-form-checkbox>
+                </b-button-group>
+            </b-form-group>
         </div>
     </script>
 
@@ -65,8 +75,23 @@
     -->
 
     <script type='text/x-template' id='slider'>
-        <div class="slider-container">
-            <input type="text" data-provide="slider" data-slider-tooltip="always" :data-slider-value="'[' + Math.min(...points) + ', ' + Math.max(...points) + ']'"/>
+        <div class="query">
+            <div class="slider-title">
+                <div class="first-slider-badge">
+                    <b-badge pill>{{ Math.min(modelvar.lower, modelvar.upper) }}</b-badge>
+                </div>
+                <div class="second-slider-badge">
+                    <b-badge>{{ title }}</b-badge>
+                </div>
+                <div class="third-slider-badge">
+                    <b-badge pill>{{ Math.max(modelvar.lower, modelvar.upper) }}</b-badge>
+                </div>
+            </div>
+            <div class="slider-proper">
+                <b-form-input ref="background_slider" class="corer" style="position: absolute; z-index: 1;" type="range" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.lower" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.upper" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+            </div>
         </div>
     </script>
 
@@ -80,30 +105,32 @@
         <div id="queries">
             
             <anyall>
-                <input id="form-tags-1" name="tags-1" type="text">
+                <tags :modi="heh" :modelvar="tagsmodel"/>
             </anyall>
 
             <anyall>
-                <picker :opts="civs"></picker>
+                <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
             </anyall>
 
             <div class="query">
-                <picker :opts="types"></picker>
+                <picker :modi="heh" :modelvar="typmodel" :opts="types"></picker>
             </div>
 
             <div class="query">
-                <div class="query-title">COST</div>
-                <slider :points="cost_points"></slider>
+                <slider :modi="heh" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
             </div>
 
             <div class="query">
-                <div class="query-title">POWER</div>
-                <slider :points="power_points"></slider>
+                <slider :modi="heh" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
             </div>
 
             <div class="query">
-                <div class="query-title">SET</div>
-                <slider :points="set_points"></slider>
+                <slider :modi="heh" :modelvar="setmodel" title="SET" :points="set_points"></slider>
+            </div>
+
+
+            <div class="query">
+                <input type="button" @click="show()">hehe</input>
             </div>
 
         </div>

@@ -60,21 +60,87 @@ html, body, #app {
 
 .query-title {
     margin: auto;
-    -webkit-user-select: none; /* Safari */        
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE10+/Edge */
     user-select: none;
     font-family: "Lucida Console"
 }
 
-.slider-container {
+.slider-title {
+    user-select: none;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: space-between;
+}
+
+.slider-proper {
+    position: relative;
+}
+
+.first-slider-badge {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.second-slider-badge {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.third-slider-badge {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
 }
 
 #cards {
     flex: 4;
     margin: 5px;
     background-color: palevioletred;
+}
+
+.thumb {
+    pointer-events: none;
+}
+
+input[type='range'] {
+    pointer-events: none;
+}
+
+input[class='thumb custom-range']::-webkit-slider-runnable-track {
+    background-color: transparent;
+}
+
+input[class='thumb custom-range']::-moz-range-track {
+    background-color: transparent;
+}
+
+input[class='thumb custom-range']::-webkit-slider-thumb {
+    background: #434343;
+    pointer-events: all;
+}
+
+input[class='thumb custom-range']::-moz-range-thumb {
+    background: #434343;
+    pointer-events: all;
+}
+
+input[class='corer custom-range']::-moz-range-track {
+    background-image: transparent;
+}
+
+input[class='corer custom-range']::-webkit-slider-thumb {
+    background: transparent;
+}
+
+input[type='corer custom-range']::-moz-range-thumb {
+    background: transparent;
+}
+
+:root {
+    --lowerbound: 0%;
+    --upperbound: 100%;
+}
+
+input[class='corer custom-range']::-webkit-slider-runnable-track {
+    background-image: linear-gradient(to right, #dee2e6 var(--lowerbound), #434343 var(--lowerbound) var(--upperbound), #dee2e6 var(--upperbound) 100%);   
 }
