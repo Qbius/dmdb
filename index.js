@@ -1,10 +1,31 @@
 Vue.component('tags', {
     template: '#tags',
-    props: ['modelvar', 'modi']
+    props: ['modelvar', 'modi'],
+    methods: {
+        addrow(index) {
+            if (index + 1 == this.modelvar.rows.length) {
+                this.modelvar.rows.push([]);
+            }
+            else {
+                this.modelvar.rows.splice(index, 1);
+            }
+        }
+    }
 });
 Vue.component('picker', {
     template: '#picker',
-    props: ['modelvar', 'opts', 'modi']
+    props: ['modelvar', 'opts', 'modi'],
+    methods: {
+        conflict(val) {
+            if (!this.modelvar[val]) {
+                for (const opt of this.opts) {
+                    if (opt.value === val && opt.conflict) {
+                        this.modelvar[opt.conflict] = false;
+                    }
+                }
+            }
+        }
+    }
 });
 Vue.component('slider', {
     template: '#slider',
@@ -14,8 +35,8 @@ Vue.component('slider', {
     },
     methods: {
         update() {
-            const lower = Math.round((Math.min(this.modelvar.lower, this.modelvar.upper) - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%'
-            const upper = Math.round((Math.max(this.modelvar.lower, this.modelvar.upper) - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%'
+            const lower = Math.floor((Math.min(this.modelvar.lower, this.modelvar.upper) - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%'
+            const upper = Math.ceil((Math.max(this.modelvar.lower, this.modelvar.upper) - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%'
 
             this.$refs.background_slider.$el.style.setProperty('--lowerbound', lower);
             this.$refs.background_slider.$el.style.setProperty('--upperbound', upper);
@@ -40,23 +61,27 @@ var app = new Vue({
     el: '#app',
     data: {
         civs: [
-            {'text': 'Fire', 'value': 'fire', 'variant': 'outline-danger'}, 
-            {'text': 'Darkness', 'value': 'darkness', 'variant': 'outline-dark'}, 
-            {'text': 'Water', 'value': 'water', 'variant': 'outline-primary'}, 
-            {'text': 'Light', 'value': 'light', 'variant': 'outline-warning'},
-            {'text': 'Nature', 'value': 'nature', 'variant': 'outline-success'},
-            {'text': 'Multi', 'value': 'multi', 'variant': 'outline-light'},
+            {'text': 'Fire', 'value': 'fire', 'variant': 'outline-danger', 'size': 'sm'}, 
+            {'text': 'Darkness', 'value': 'darkness', 'variant': 'outline-dark', 'size': 'sm'}, 
+            {'text': 'Water', 'value': 'water', 'variant': 'outline-primary', 'size': 'sm'}, 
+            {'text': 'Light', 'value': 'light', 'variant': 'outline-warning', 'size': 'sm'},
+            {'text': 'Nature', 'value': 'nature', 'variant': 'outline-success', 'size': 'sm'}
         ],
 
         types: [
-            {'text': 'Creature', 'value': 'creature', 'variant': 'outline-secondary'},
-            {'text': 'Spell', 'value': 'spell', 'variant': 'outline-secondary'},
-            {'text': 'Evolution', 'value': 'evolution', 'variant': 'outline-secondary'},
+            {'text': 'Creature', 'value': 'creature', 'variant': 'light', 'size': 'sm'},
+            {'text': 'Spell', 'value': 'spell', 'variant': 'light', 'size': 'sm'},
+            {'text': 'Evolution', 'value': 'evolution', 'variant': 'light', 'size': 'sm'},
+        ],
+        
+        civtypes :[
+            {'text': 'Mono', 'value': 'mono', 'variant': 'light', 'size': 'sm', 'conflict': 'multi'},
+            {'text': 'Multi', 'value': 'multi', 'variant': 'light', 'size': 'sm', 'conflict': 'mono'},       
         ],
 
         cost_points: [1, 13, 1],
 
-        power_points: [500, 15000, 500],
+        power_points: [0, 15000, 500],
 
         set_points: [1, 12, 1],
         
@@ -64,12 +89,15 @@ var app = new Vue({
         opt: "",
         modelvar: {},
         title: "",
+        row: "",
+        index: "",
+        key: "",
+        value: "",
 
         // v-model variables
         tagsmodel: {},
-        tagsanyall: {},
         civmodel: {},
-        civsanyall: {},
+        civtypmodel: {},
         typmodel: {},
         costmodel: {},
         powermodel: {},
@@ -77,33 +105,39 @@ var app = new Vue({
     },
     methods: {
         reset() {
-            this.tagsmodel = {tags: []},
-            this.tagsanyall = {state: false},
-            this.civmodel = {fire: false, darkness: false, water: false, light: false, nature: false, multi: false},
+            this.tagsmodel = {rows: [[]]},
+            this.civmodel = {fire: false, darkness: false, water: false, light: false, nature: false},
+            this.civtypmodel = {mono: false, multi: false},
             this.typmodel = {creature: false, spell: false, evolution: false},
             this.costmodel = {lower: "1", upper: "13"},
             this.powermodel = {lower: "0", upper: "15000"},
             this.setmodel = {lower: "1", upper: "12"}
         },
         heh() {
-            const no_multi_keys = Object.keys(this.civmodel).filter(x => x !== "multi");
-            const enabled_civs = no_multi_keys.map(key => this.civmodel[key]).some(v => v) ? no_multi_keys.filter(key => this.civmodel[key]) : no_multi_keys;
-            
 
+            const enabled_civs = Object.keys(this.civmodel).map(key => this.civmodel[key]).some(v => v) ? Object.keys(this.civmodel).filter(key => this.civmodel[key]) : Object.keys(this.civmodel);
+            
             $("#cards").html(Object.keys(tcg).filter(key => {
                 const{"civilization": cardcivs, "card type": cardtype, "mana cost": cardcost, "effect": cardeffe, "rarity": cardrari, "set": cardsets} = tcg[key];
 
                 const civ_checking_f = v => enabled_civs.indexOf(v) !== -1;
-                const civsok = cardcivs.every(civ_checking_f) && (!this.civmodel.multi || cardcivs.length > 1);
+                const civsok = cardcivs.every(civ_checking_f);
+
+                const civtypok = (!this.civtypmodel.mono && !this.civtypmodel.multi) || ((this.civtypmodel.mono === (cardcivs.length === 1)) && (this.civtypmodel.multi === (cardcivs.length !== 1)));
+
                 const typeok = !Object.values(this.typmodel).some(v => v) || this.typmodel[cardtype.split(' ')[0]];
                 const costok = cardcost >= Math.min(this.costmodel.lower, this.costmodel.upper) && cardcost <= Math.max(this.costmodel.lower, this.costmodel.upper);
                 const setsok = cardsets.map(dmset => Math.round(dmset.replace('dm-', '').split(':')[0])).every(setnr => setnr >= Math.min(this.setmodel.lower, this.setmodel.upper) && setnr <= Math.max(this.setmodel.lower, this.setmodel.upper));
-                const powrok = !tcg[key]["power"] || (tcg[key]["power"] >= Math.min(this.powermodel.lower, this.powermodel.upper) && tcg[key]["power"] <= Math.max(this.powermodel.lower, this.powermodel.upper));
+                
+                const lower_power = Math.min(this.powermodel.lower, this.powermodel.upper);
+                const upper_power = Math.max(this.powermodel.lower, this.powermodel.upper);
+                const power_modified = (this.power_points[0] != lower_power) || (this.power_points[1] != upper_power)
+                const powrok = !power_modified || (tcg[key]["power"] && tcg[key]["power"] >= power_lower && tcg[key]["power"] <= power_upper);
 
                 const tag_checking_f = tag => key.includes(tag) || cardeffe.some(eff => eff.includes(tag)) || (tcg[key]["race"] && tcg[key]["race"].some(race => race.includes(tag)));
-                const lowertags = this.tagsmodel.tags.map(tag => tag.toLowerCase());
-                const tagsok = lowertags.length === 0 || this.tagsanyall.state ? lowertags.every(tag_checking_f) : lowertags.some(tag_checking_f);
-                return civsok && typeok && costok && setsok && powrok && tagsok;
+                const processed_tags = this.tagsmodel.rows.filter(row => row.length > 0);
+                const tagsok = processed_tags.length === 0 || processed_tags.some(row => row.every(tag_checking_f));
+                return civsok && civtypok && typeok && costok && setsok && powrok && tagsok;
             }).sort().map(card => '<img class="card-image" alt="' + card + '" src="dm_images/' + card + '.jpg">').join('<br/>'));
         }
     }

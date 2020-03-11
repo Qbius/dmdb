@@ -21,17 +21,30 @@ html, body, #app {
     background-color: black;
     flex: 1;
     width: 100%;
-    padding: 5px;
+    padding: 2px;
     margin: auto;
     display: flex;
     max-height: 100vh;
     justify-content: space-between;
 }
 
+.column-container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+}
+
+.paddin-column-container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    padding-bottom: 10px;
+}
+
 #queries {
     border-radius: 25px;
     flex: 1;
-    margin: 5px;
+    margin: 2px;
     display: flex;
     flex-direction: column;
     padding-top: 20px;
@@ -41,12 +54,50 @@ html, body, #app {
 }
 
 .query {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    margin-left: 5px;
-    margin-right: 5px;
     display: flex;
     flex-direction: column;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.pickem {
+    background-color: var(--controlcolor);
+    border-radius: .2rem;
+    padding: 4px;
+    padding-bottom: 6px;
+}
+
+.pickem-down {
+    margin-top: 3px;
+    display: flex;
+    justify-content: space-between;
+    height: 15px;
+}
+
+.btn-lg {
+    display: flex!important;
+    border: 3px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.btn-sm {
+    display: flex!important;
+    justify-content: center;
+    padding-top: 0px!important;
+    padding-bottom: 0px!important;
+}
+
+.close {
+    display: none!important;
+}
+
+.b-form-tags-button {
+    display: none!important;
 }
 
 .anyall-buttons {
@@ -56,11 +107,16 @@ html, body, #app {
 
 .picker-container {
     display: flex;
-    justify-content: center;
 }
 
 .picker-item {
-    margin: -10;
+    font-size: 1px;
+    flex: 1;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
 }
 
 .slider-title {
@@ -71,6 +127,7 @@ html, body, #app {
 
 .slider-proper {
     position: relative;
+    padding-bottom: 12px;
 }
 
 .first-slider-badge {
@@ -139,16 +196,16 @@ input[class='corer custom-range']::-moz-range-track {
 
 #cards {
     border-radius: 25px;
-    flex: 4;
+    flex: 5;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    align-content: flex-start;
-    margin: 5px;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
     overflow-y: scroll;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin: 1px;
 }
 
 #cards::-webkit-scrollbar {

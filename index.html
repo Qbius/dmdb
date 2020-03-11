@@ -26,24 +26,13 @@
         TAGS
     -->
     <script type='text/x-template' id='tags'>
-        <div>
-            <b-form-tags @input="modi()" input-id="tags-pills" v-model="modelvar.tags" tag-variant="secondary" tag-pills size="sm" placeholder="Name, race, effect..."/> 
-        </div>
-    </script>
-
-    <!--
-        ANY|ALL
-        Has a slot
-    -->
-    <script type='text/x-template' id='anyall'>
-        <div class="query">
-            <div class="anyall-buttons">
-                <h6><b-badge pill>{{ modelvar.state ? "ALL" : "ANY" }}</b-badge></h6>
-                <b-form-checkbox @input="modi()" v-model="modelvar.state" name="check-button" switch/>
-            </div>
-            <div class="anyall-item">
-                <slot>A multi-input or a picker</slot>
-            </div>
+        <div class="column-container">
+            <b-input-group v-for="(row, index) in modelvar.rows">
+                <b-form-tags @input="modi()" @change="modi()" input-id="tags-pills" v-model="modelvar.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
+                <b-input-group-append>
+                    <b-button @click="addrow(index)" size="sm" :variant="(modelvar && ((index + 1) == modelvar.rows.length)) ? 'secondary' : 'danger'">{{ (modelvar.rows && ((index + 1) == modelvar.rows.length)) ? '+' : 'X' }}</b-button>
+                </b-input-group-append>
+            </b-input-group>
         </div>
     </script>
 
@@ -54,7 +43,7 @@
     -->
     <script type='text/x-template' id='picker'>
         <div class="picker-container">
-            <b-form-checkbox class="picker-item" @input="modi()" v-for="opt in opts" v-model="modelvar[opt.value]" name="whatever" size="sm" button :button-variant="opt.variant">{{opt.text}}</b-form-checkbox>
+            <b-form-checkbox pill class="picker-item" @input="modi()" v-for="opt in opts" @change="conflict(opt.value)" v-model="modelvar[opt.value]" name="whatever" :size="opt.size" button squared :button-variant="opt.variant"><font size="1">{{opt.text}}</font></b-form-checkbox>
         </div>
     </script>
 
@@ -65,7 +54,7 @@
     -->
 
     <script type='text/x-template' id='slider'>
-        <div class="query">
+        <div class="paddin-column-container">
             <div class="slider-title">
                 <div class="first-slider-badge">
                     <b-badge pill>{{ Math.min(modelvar.lower, modelvar.upper) }}</b-badge>
@@ -94,27 +83,24 @@
     <div id="site">
         <div id="queries">
             
-            <anyall :modi="heh" :modelvar="tagsanyall">
+            <div id="taggroup" class="query">
                 <tags :modi="heh" :modelvar="tagsmodel"/>
-            </anyall>
-
-            <div class="query">
-                <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
             </div>
 
-            <div class="query">
-                <picker :modi="heh" :modelvar="typmodel" :opts="types"></picker>
+            <div class="query pickem">
+                <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
+
+                <div class="pickem-down">
+                    <picker :modi="heh" :modelvar="typmodel" :opts="types"></picker>
+                    <picker :modi="heh" :modelvar="civtypmodel" :opts="civtypes"></picker>
+                </div>
             </div>
 
             <div class="query">
                 <slider :modi="heh" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
-            </div>
-
-            <div class="query">
+            
                 <slider :modi="heh" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
-            </div>
 
-            <div class="query">
                 <slider :modi="heh" :modelvar="setmodel" title="SET" :points="set_points"></slider>
             </div>
 
