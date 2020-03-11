@@ -94,7 +94,7 @@ var app = new Vue({
                 const{"civilization": cardcivs, "card type": cardtype, "mana cost": cardcost, "effect": cardeffe, "rarity": cardrari, "set": cardsets} = tcg[key];
 
                 const civ_checking_f = v => enabled_civs.indexOf(v) !== -1;
-                const civsok = this.civmodel.multi ? cardcivs.every(civ_checking_f) &&  cardcivs.length > 1 : cardcivs.some(civ_checking_f);
+                const civsok = cardcivs.every(civ_checking_f) && (!this.civmodel.multi || cardcivs.length > 1);
                 const typeok = !Object.values(this.typmodel).some(v => v) || this.typmodel[cardtype.split(' ')[0]];
                 const costok = cardcost >= Math.min(this.costmodel.lower, this.costmodel.upper) && cardcost <= Math.max(this.costmodel.lower, this.costmodel.upper);
                 const setsok = cardsets.map(dmset => Math.round(dmset.replace('dm-', '').split(':')[0])).every(setnr => setnr >= Math.min(this.setmodel.lower, this.setmodel.upper) && setnr <= Math.max(this.setmodel.lower, this.setmodel.upper));
