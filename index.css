@@ -151,8 +151,10 @@ input[class='corer custom-range']::-moz-range-track {
 .card-image {
     width: 222px; 
     height: 307px;
-    border-radius: 25px;
-    background-color: white;
+    border-radius: 10px;
+    color: var(--contentcolor);
+    text-align: center;
+    background-color: var(--controlcolor);
     margin: 2px;
     display: flex;
 }
