@@ -1,3 +1,5 @@
+hehe = [];
+
 Vue.component('tags', {
     template: '#tags',
     props: ['modelvar', 'modi'],
@@ -47,6 +49,11 @@ Vue.component('slider', {
         instantupdate() {
             clearTimeout(this.update_timeout);
             this.modi();
+        }
+    },
+    computed: {
+        load() {
+            hehe.push(() => { this.update() });
         }
     }
 })
@@ -112,8 +119,19 @@ var app = new Vue({
             this.costmodel = {lower: "1", upper: "13"},
             this.powermodel = {lower: "0", upper: "15000"},
             this.setmodel = {lower: "1", upper: "12"}
+
+            setTimeout(() => {
+                for (const slider of document.getElementsByClassName('sliderman')) {
+                    let that = slider.__vue__;
+                    const lower = Math.floor((Math.min(that.modelvar.lower, that.modelvar.upper) - that.points[0]) / (that.points[1] - that.points[0]) * 100).toString() + '%'
+                    const upper = Math.ceil((Math.max(that.modelvar.lower, that.modelvar.upper) - that.points[0]) / (that.points[1] - that.points[0]) * 100).toString() + '%'
+        
+                    that.$refs.background_slider.$el.style.setProperty('--lowerbound', lower);
+                    that.$refs.background_slider.$el.style.setProperty('--upperbound', upper);
+                }
+            }, 10);
+
             this.heh();
-            console.log(this);
         },
         heh() {
 
@@ -123,7 +141,6 @@ var app = new Vue({
             const upper_power = Math.max(this.powermodel.lower, this.powermodel.upper);
             const power_modified = (this.power_points[0] != lower_power) || (this.power_points[1] != upper_power)
             const powrok = !power_modified || (tcg["aqua hulcus"]["power"] && tcg["aqua hulcus"]["power"] >= lower_power && tcg["aqua hulcus"]["power"] <= upper_power);
-            console.log(power_modified);
             
             $("#cards").html(Object.keys(tcg).filter(key => {
                 const{"civilization": cardcivs, "card type": cardtype, "mana cost": cardcost, "effect": cardeffe, "rarity": cardrari, "set": cardsets} = tcg[key];
