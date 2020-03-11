@@ -147,3 +147,12 @@ input[class='corer custom-range']::-moz-range-track {
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
 }
+
+.card-image {
+    width: 222px; 
+    height: 307px;
+    border-radius: 25px;
+    background-color: white;
+    margin: 2px;
+    display: flex;
+}
