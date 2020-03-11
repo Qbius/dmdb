@@ -104,7 +104,7 @@ var app = new Vue({
                 const lowertags = this.tagsmodel.tags.map(tag => tag.toLowerCase());
                 const tagsok = lowertags.length === 0 || this.tagsanyall.state ? lowertags.every(tag_checking_f) : lowertags.some(tag_checking_f);
                 return civsok && typeok && costok && setsok && powrok && tagsok;
-            }).sort().map(card => '<img src="dm_images/' + card + '.jpg">').join('<br/>'));
+            }).sort().map(card => '<img style="width: 222px; height: 307px;" alt="' + card + '" src="dm_images/' + card + '.jpg">').join('<br/>'));
         }
     }
 });
