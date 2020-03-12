@@ -195,6 +195,7 @@ input[class='corer custom-range']::-moz-range-track {
 }
 
 #cards {
+    user-select: none;
     border-radius: 25px;
     flex: 5;
     display: flex;
