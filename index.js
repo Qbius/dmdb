@@ -451,7 +451,45 @@ const RU = [
     "peppi pepper",
 ];
 
+const ratuj = [
+    "aqua skydiver",
+    "aqua surfer",
+    "balza, seeker of hyperpearls",
+    "bonds of justice",
+    "burst shot",
+    "cloned deflector",
+    "dracobarrier",
+    "fantasy fish",
+    "full defensor",
+    "holy awe",
+    "hunter cluster",
+    "kolon, the oracle",
+    "magmarex",
+    "mana nexus",
+    "miraculous truce",
+    "natural snare",
+    "phantom dragon's flame",
+    "poltalester, the spydroid",
+    "protective force",
+    "solar ray",
+    "soulswap",
+    "spiral gate",
+    "ten-ton crunch",
+    "terror pit",
+    "tornado flame",
+    "transmogrify",
+    "unified resistance",
+];
+
 const tiers = {"ou": Ubers, "uu": [...Ubers, ...OU], "ru": [...Ubers, ...OU, ...UU], "pu": [...Ubers, ...OU, ...UU, ...RU]};
+
+const special = {
+    "ou": (tag, key) => tiers[tag].indexOf(key) === -1,
+    "uu": (tag, key) => tiers[tag].indexOf(key) === -1,
+    "ru": (tag, key) => tiers[tag].indexOf(key) === -1,
+    "pu": (tag, key) => tiers[tag].indexOf(key) === -1,
+    "ratuj": (tag, key) => ratuj.indexOf(key) !== -1,
+}
 
 var app = new Vue({
     el: '#app',
@@ -542,7 +580,7 @@ var app = new Vue({
                 const power_modified = (this.power_points[0] != lower_power) || (this.power_points[1] != upper_power)
                 const powrok = !power_modified || (tcg[key]["power"] && tcg[key]["power"] >= lower_power && tcg[key]["power"] <= upper_power);
 
-                const tag_check_f = tag => (tag in tiers) ? (tiers[tag].indexOf(key) === -1) : (key.includes(tag) || cardeffe.some(eff => eff.includes(tag)) || (tcg[key]["race"] && tcg[key]["race"].includes(tag)));
+                const tag_check_f = tag => (tag in special) ? special[tag](tag, key) : (key.includes(tag) || cardeffe.some(eff => eff.includes(tag)) || (tcg[key]["race"] && tcg[key]["race"].includes(tag)));
                 const tag_checking_f = tag => (tag[0] === '!' ? !tag_check_f(tag.split('!').splice(1).join('!')) : tag_check_f(tag));
                 const processed_tags = this.tagsmodel.rows.filter(row => row.length > 0);
                 const tagsok = processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
