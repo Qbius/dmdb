@@ -425,6 +425,7 @@ const special = {
     "ru": (tag, key) => tiers[tag].indexOf(key) === -1,
     "pu": (tag, key) => tiers[tag].indexOf(key) === -1,
     "ratuj": (tag, key) => ratuj.indexOf(key) !== -1,
+    "doge": (tag, key) => key === "holy awe",
 }
 
 Vue.component('tags', {
@@ -621,7 +622,8 @@ var app = new Vue({
                 const tagsok = processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
                 return civsok && civtypok && typeok && costok && setsok && powrok && tagsok;
             }).sort();
-            return filtered.map(card => ({name: card, count: (this.searchtypemodel.tcg ? 1 : deckcards[card]) }));
+            const dogegg = this.tagsmodel.rows.some(row => row.some(tag => tag.toLowerCase() === "doge"));
+            return filtered.map(card => ({name: card, count: (this.searchtypemodel.tcg ? 1 : deckcards[card]), image: ('dm_images/' + ((card == "holy awe" && dogegg) ? 'holydoge' : card) + '.jpg')}));
         },
     }
 });

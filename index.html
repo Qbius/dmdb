@@ -147,7 +147,7 @@
 
         <div id="cards">
             <div class="card-container" v-for="card in queried_cards" :style="'height: ' + (307 + 20 * (card.count - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
-                <img v-for="i in [...Array(card.count).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="'dm_images/' + card.name + '.jpg'">
+                <img v-for="i in [...Array(card.count).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="card.image">
             </div>
         </div>
 
