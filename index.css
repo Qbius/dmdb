@@ -75,21 +75,44 @@ html, body, #app {
     display: flex;
     margin-right: 25px;
     margin-left: 25px;
-    margin-top: 7px;
+    margin-top: 4px;
     margin-bottom: 4px;
     user-select: none;
+    flex-wrap: wrap;
+}
+
+#civtotals {
+    flex: 1;
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 3px;
 }
 
 .subtotals-total {
-    flex: 1;
     display: flex;
     justify-content: center;
 }
 
+#tottotal-wrapper {
+    display: flex;
+    align-content: flex-end;
+}
+
+#civtotal-wrapper {
+    display: flex;
+    align-content: flex-start;
+}
+
 .subtotals {
-    flex: 4;
     display: flex;
     justify-content: center;
+}
+
+#efftotals {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-top: 3px;
 }
 
 .totalbdg {

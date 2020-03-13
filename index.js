@@ -472,12 +472,17 @@ Vue.component('slider', {
 })
 Vue.component('totalbadge', {
     template: '#totalbadge',
-    props: ['badgevariant', 'testf', 'getcards'],
+    props: ['badgevariant', 'testf', 'getcards', 'always'],
     data() {
         return {
             applicable: Object.entries(tcg).filter(([name, info]) => this.testf(info)).map(([name, info]) => name)
         }
     },
+    computed: {
+        count() {
+            return this.getcards() ? Object.entries(this.getcards()).reduce((total, [name, count]) => total + (this.applicable && this.applicable.indexOf(name.toLowerCase()) !== -1 ? count : 0), 0) : ""
+        }
+    }
 });
 
 var app = new Vue({
@@ -521,11 +526,12 @@ var app = new Vue({
         key: "",
         value: "",
         total: "",
-        count: "",
+        count: () => "",
         name: "",
         applicable: [],
         addcard: "",
         getcards: () => {},
+        always: "",
 
         // v-model variables
         searchtypemodel: {tcg: true, deck: false},

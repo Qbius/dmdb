@@ -74,9 +74,9 @@
         TOTALBADGE
     -->
     <script type='text/x-template' id='totalbadge'>
-        <b-badge class="totalbdg" :variant="badgevariant">
+        <b-badge v-if="always || count > 0" class="totalbdg" :variant="badgevariant">
             <slot></slot>
-            {{ getcards() ? Object.entries(getcards()).reduce((total, [name, count]) => total + (applicable && applicable.indexOf(name.toLowerCase()) !== -1 ? count : 0), 0) : "" }}
+            {{ count }}
         </b-badge>
     </script>
 
@@ -121,20 +121,28 @@
 
             <div id="deck">
                 <div id="totals">
-                    <div class="subtotals-total">
-                        <totalbadge :getcards="deck_cards" badgevariant="" :testf="_ => true"></totalbadge>
+                    <div id="civtotals">
+                        <div id="tottotal-wrapper">
+                            <div class="subtotals-total">
+                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="" :testf="_ => true"></totalbadge>
+                            </div>
+                        </div>
+                        <div id="civtotal-wrapper">
+                            <div class="subtotals">
+                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
+                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
+                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
+                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
+                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
+                            </div>
+                        </div>
                     </div>
-                    <div class="subtotals">
-                        <totalbadge :getcards="deck_cards" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
-                    </div>
-                    <div class="subtotals">
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('shield trigger ('))"><img src="icons/shieldtrigger.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('blocker ('))"><img src="icons/blocker.png"></totalbadge>
+                    <div id="efftotals">
+                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('shield trigger ('))"><img src="icons/shieldtrigger.png"></totalbadge>
+                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('blocker ('))"><img src="icons/blocker.png"></totalbadge>
                         <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('evolution:'))"><img src="icons/evolutioncreature.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('wave striker ('))"><img src="icons/wavestriker.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="(info) => info.race && info.race.indexOf('survivor') !== -1"><img src="icons/survivor.png"></totalbadge>
                     </div>
                 </div>
                 <textarea id="decktext" v-model="deck.text" rows="20"></textarea>
