@@ -433,12 +433,17 @@ Vue.component('tags', {
     props: ['modelvar'],
     methods: {
         addrow(index) {
-            if (index + 1 == this.modelvar.rows.length) {
-                this.modelvar.rows.push([]);
+            if (index + 1 == this.modelvar.data.rows.length) {
+                this.modelvar.data.rows.push([]);
             }
             else {
-                this.modelvar.rows.splice(index, 1);
+                this.modelvar.data.rows.splice(index, 1);
             }
+        }
+    },
+    computed: {
+        rows() {
+            return this.modelvar.data ? this.modelvar.data.rows : [];
         }
     }
 });
@@ -447,10 +452,10 @@ Vue.component('picker', {
     props: ['modelvar', 'opts'],
     methods: {
         conflict(val) {
-            if (!this.modelvar[val]) {
+            if (!this.modelvar.data[val]) {
                 for (const opt of this.opts) {
                     if (opt.value === val && opt.conflict) {
-                        this.modelvar[opt.conflict] = false;
+                        this.modelvar.data[opt.conflict] = false;
                     }
                 }
             }
@@ -460,13 +465,12 @@ Vue.component('picker', {
 Vue.component('slider', {
     template: '#slider',
     props: ['modelvar', 'title', 'points'],
-    methods: {
-        update() {
-            const lower = Math.floor((Math.min(this.modelvar.lower, this.modelvar.upper) - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%'
-            const upper = Math.ceil((Math.max(this.modelvar.lower, this.modelvar.upper) - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%'
-
-            this.$refs.background_slider.$el.style.setProperty('--lowerbound', lower);
-            this.$refs.background_slider.$el.style.setProperty('--upperbound', upper);
+    computed: {   
+        bgstyle() {
+            const lower = Math.floor((this.modelvar.lower - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%';
+            const upper = Math.ceil((this.modelvar.upper - this.points[0]) / (this.points[1] - this.points[0]) * 100).toString() + '%';
+            
+            return '--lowerbound: ' + lower + '; --upperbound: ' + upper + ';'
         }
     }
 })
@@ -485,6 +489,38 @@ Vue.component('totalbadge', {
     }
 });
 
+const Model = class {
+    constructor(defvalue, testf) {
+        this.default = {...defvalue};
+        this.data = {...defvalue};
+        this.testf = testf;
+    }
+    get modified() {
+        const data = Object.entries(this.data).sort();
+        if (Array.isArray(this.data.rows)) {
+            return !data.rows || data.rows.some(row => row.length > 0);
+        }
+        else {
+            const defa = Object.entries(this.default).sort();
+            return data.some(([key, value], i) => key !== defa[i][0] || value !== defa[i][1]);
+        }
+    }
+    reset() {
+        this.data = {...this.default};
+    }
+    test(cardinfo) {
+        return this.testf(cardinfo, this);
+    }
+    
+    get lower() {
+        return Math.min(this.data.lowerval, this.data.upperval);
+    }
+    
+    get upper() {
+        return Math.max(this.data.lowerval, this.data.upperval);
+    }
+}
+
 var app = new Vue({
     el: '#app',
     data: {
@@ -499,7 +535,7 @@ var app = new Vue({
             {'text': 'Light', 'value': 'light', 'variant': 'outline-warning', 'size': 'sm'},
             {'text': 'Nature', 'value': 'nature', 'variant': 'outline-success', 'size': 'sm'}
         ],
-
+        
         types: [
             {'text': 'Creature', 'value': 'creature', 'variant': 'light', 'size': 'sm'},
             {'text': 'Spell', 'value': 'spell', 'variant': 'light', 'size': 'sm'},
@@ -510,17 +546,18 @@ var app = new Vue({
             {'text': 'Mono', 'value': 'mono', 'variant': 'light', 'size': 'sm', 'conflict': 'multi'},
             {'text': 'Multi', 'value': 'multi', 'variant': 'light', 'size': 'sm', 'conflict': 'mono'},       
         ],
-
+        
         cost_points: [1, 13, 1],
-
+        
         power_points: [0, 15000, 500],
-
+        
         set_points: [1, 12, 1],
         
         // throwaway variables to disable warnings
         opt: "",
         modelvar: {},
         title: "",
+        rows: "",
         row: "",
         index: "",
         key: "",
@@ -533,37 +570,40 @@ var app = new Vue({
         getcards: () => {},
         always: "",
 
+        vue: this,
         // v-model variables
-        searchtypemodel: {tcg: true, deck: false},
-        tagsmodel: {rows: []},
-        civmodel: {},
-        civtypmodel: {},
-        typmodel: {},
-        costmodel: {},
-        powermodel: {},
-        setmodel: {},
+        searchtypemodel: {data: {tcg: true, deck: false}},
+        models: {
+            tags: new Model({rows: [[]]}, ({'name': cardname, 'effect': cardeffe, 'rarity': cardrari, 'race': cardrace}, model) => {
+                const tag_check_f = tag => (tag in special) ? special[tag](tag, key) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
+                const tag_checking_f = tag => (tag[0] === '!' ? !tag_check_f(tag.split('!').splice(1).join('!')) : tag_check_f(tag));
+                const processed_tags = model.data.rows.filter(row => row.length > 0);
+                return processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
+            }),
+            civ: new Model({fire: false, darkness: false, water: false, light: false, nature: false}, ({'civilization': cardcivs}, model) => {
+                return cardcivs.every(v => model.data[v])
+            }),
+            civtyp: new Model({mono: false, multi: false}, ({'civilization': cardcivs}, model) => {
+                return ((model.data.mono === (cardcivs.length === 1)) && (model.data.multi === (cardcivs.length !== 1)))
+            }),
+            typ: new Model({creature: false, spell: false, evolution: false}, ({'card type': cardtype}, model) => {
+                return model.data[cardtype.split(' ')[0]]
+            }),
+            cost: new Model({lowerval: "1", upperval: "13"}, ({'mana cost': cardcost}, model) => {
+                return cardcost >= model.lower && cardcost <= model.upper
+            }),
+            power: new Model({lowerval: "0", upperval: "15000"}, ({'power': cardpower}, model) => {
+                return cardpower && cardpower >= model.lower && cardpower <= model.upper
+            }),
+            set: new Model({lowerval: "1", upperval: "12"}, ({'set': cardsets}, model) => {
+                return cardsets.map(dmset => Math.round(dmset.replace('dm-', '').split(':')[0])).some(setnr => setnr >= model.lower && setnr <= model.upper);
+            }),
+        },
         deck: {text: ""},
     },
     methods: {
         reset() {
-            this.tagsmodel = {rows: [[]]},
-            this.civmodel = {fire: false, darkness: false, water: false, light: false, nature: false},
-            this.civtypmodel = {mono: false, multi: false},
-            this.typmodel = {creature: false, spell: false, evolution: false},
-            this.costmodel = {lower: "1", upper: "13"},
-            this.powermodel = {lower: "0", upper: "15000"},
-            this.setmodel = {lower: "1", upper: "12"}
-
-            setTimeout(() => {
-                for (const slider of document.getElementsByClassName('sliderman')) {
-                    let that = slider.__vue__;
-                    const lower = Math.floor((Math.min(that.modelvar.lower, that.modelvar.upper) - that.points[0]) / (that.points[1] - that.points[0]) * 100).toString() + '%'
-                    const upper = Math.ceil((Math.max(that.modelvar.lower, that.modelvar.upper) - that.points[0]) / (that.points[1] - that.points[0]) * 100).toString() + '%'
-        
-                    that.$refs.background_slider.$el.style.setProperty('--lowerbound', lower);
-                    that.$refs.background_slider.$el.style.setProperty('--upperbound', upper);
-                }
-            }, 10);
+            Object.values(this.models).forEach(model => model.reset());
         },
         deck_cards() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
@@ -598,38 +638,11 @@ var app = new Vue({
             return this.deck.text.split('\n').map(line => line.trim().substring(card.search(' ')).trim()).filter(line => line.length !== 0);
         },
         queried_cards() {
-            const enabled_civs = Object.keys(this.civmodel).map(key => this.civmodel[key]).some(v => v) ? Object.keys(this.civmodel).filter(key => this.civmodel[key]) : Object.keys(this.civmodel);
-
             const deckcards = this.deck_cards();
-            const filtered = Object.keys(this.searchtypemodel.tcg ? tcg : deckcards).filter(key => {
-                if (!(key in tcg)) return false;
-
-                const{"civilization": cardcivs, "card type": cardtype, "mana cost": cardcost, "effect": cardeffe, "rarity": cardrari, "set": cardsets} = tcg[key];
-                const power = tcg[key]["power"];
-                const race = tcg[key]["race"];
-
-                const civ_checking_f = v => enabled_civs.indexOf(v) !== -1;
-                const civsok = cardcivs.every(civ_checking_f);
-
-                const civtypok = (!this.civtypmodel.mono && !this.civtypmodel.multi) || ((this.civtypmodel.mono === (cardcivs.length === 1)) && (this.civtypmodel.multi === (cardcivs.length !== 1)));
-
-                const typeok = !Object.values(this.typmodel).some(v => v) || this.typmodel[cardtype.split(' ')[0]];
-                const costok = cardcost >= Math.min(this.costmodel.lower, this.costmodel.upper) && cardcost <= Math.max(this.costmodel.lower, this.costmodel.upper);
-                const setsok = cardsets.map(dmset => Math.round(dmset.replace('dm-', '').split(':')[0])).some(setnr => setnr >= Math.min(this.setmodel.lower, this.setmodel.upper) && setnr <= Math.max(this.setmodel.lower, this.setmodel.upper));
-                
-                const lower_power = Math.min(this.powermodel.lower, this.powermodel.upper);
-                const upper_power = Math.max(this.powermodel.lower, this.powermodel.upper);
-                const power_modified = (this.power_points[0] != lower_power) || (this.power_points[1] != upper_power)
-                const powrok = !power_modified || (power && power >= lower_power && power <= upper_power);
-
-                const tag_check_f = tag => (tag in special) ? special[tag](tag, key) : (key.includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (race && race.includes(tag)));
-                const tag_checking_f = tag => (tag[0] === '!' ? !tag_check_f(tag.split('!').splice(1).join('!')) : tag_check_f(tag));
-                const processed_tags = this.tagsmodel.rows.filter(row => row.length > 0);
-                const tagsok = processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
-                return civsok && civtypok && typeok && costok && setsok && powrok && tagsok;
-            }).sort();
-            const dogegg = this.tagsmodel.rows.some(row => row.some(tag => tag.toLowerCase() === "doge"));
-            return filtered.map(card => ({name: card, count: (this.searchtypemodel.tcg ? 1 : deckcards[card]), image: ('dm_images/' + ((card == "holy awe" && dogegg) ? 'holydoge' : card) + '.jpg')}));
+            const modified_models = Object.entries(this.models).filter(([name, model]) => model.modified);
+            const filtered = Object.keys(this.searchtypemodel.data.tcg ? tcg : deckcards).filter(key => modified_models.every(([n, m]) => m.test(tcg[key]))).sort();
+            const dogegg = this.models.tags.data.rows.some(row => row.some(tag => tag.toLowerCase() === "doge"));
+            return filtered.map(card => ({name: card, count: (this.searchtypemodel.data.tcg ? 1 : deckcards[card]), image: ('dm_images/' + ((card == "holy awe" && dogegg) ? 'holydoge' : card) + '.jpg')}));
         },
     }
 });

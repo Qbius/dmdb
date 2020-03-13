@@ -27,10 +27,10 @@
     -->
     <script type='text/x-template' id='tags'>
         <div class="column-container">
-            <b-input-group v-for="(row, index) in modelvar.rows">
-                <b-form-tags input-id="tags-pills" v-model="modelvar.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
+            <b-input-group v-for="(row, index) in rows">
+                <b-form-tags input-id="tags-pills" v-model="modelvar.data.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
                 <b-input-group-append>
-                    <b-button @click="addrow(index)" size="sm" :variant="(modelvar && ((index + 1) == modelvar.rows.length)) ? 'secondary' : 'danger'">{{ (modelvar.rows && ((index + 1) == modelvar.rows.length)) ? '+' : 'X' }}</b-button>
+                    <b-button @click="addrow(index)" size="sm" :variant="(((index + 1) == rows.length)) ? 'secondary' : 'danger'">{{ (((index + 1) == rows.length)) ? '+' : 'X' }}</b-button>
                 </b-input-group-append>
             </b-input-group>
         </div>
@@ -41,7 +41,7 @@
     -->
     <script type='text/x-template' id='picker'>
         <div class="picker-container">
-            <b-form-checkbox pill class="picker-item" v-for="opt in opts" @change="conflict(opt.value)" v-model="modelvar[opt.value]" name="whatever" :size="opt.size" button squared :button-variant="opt.variant"><font size="1">{{opt.text}}</font></b-form-checkbox>
+            <b-form-checkbox pill class="picker-item" v-for="opt in opts" @change="conflict(opt.value)" v-model="modelvar.data[opt.value]" name="whatever" :size="opt.size" button squared :button-variant="opt.variant"><font size="1">{{opt.text}}</font></b-form-checkbox>
         </div>
     </script>
 
@@ -53,19 +53,19 @@
         <div class="paddin-column-container">
             <div class="slider-title">
                 <div class="first-slider-badge">
-                    <b-badge pill>{{ Math.min(modelvar.lower, modelvar.upper) }}</b-badge>
+                    <b-badge pill>{{ modelvar.lower }}</b-badge>
                 </div>
                 <div class="second-slider-badge">
                     <b-badge>{{ title }}</b-badge>
                 </div>
                 <div class="third-slider-badge">
-                    <b-badge pill>{{ Math.max(modelvar.lower, modelvar.upper) }}</b-badge>
+                    <b-badge pill>{{ modelvar.upper }}</b-badge>
                 </div>
             </div>
             <div class="slider-proper">
-                <b-form-input ref="background_slider" class="corer" style="position: absolute; z-index: 1;" type="range" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
-                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.lower" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
-                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.upper" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input ref="background_slider" class="corer" :style="bgstyle + 'position: absolute; z-index: 1;'" type="range" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.data.lowerval" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.data.upperval" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
             </div>
         </div>
     </script>
@@ -91,30 +91,32 @@
         <div id="side">
             <div id="queries">
 
-                <picker :modelvar="searchtypemodel" :opts="searchtypes"></picker>
+                <div id="searchtype">
+                    <picker :modelvar="searchtypemodel" :opts="searchtypes"></picker>
+                </div>
                 
                 <div id="taggroup" class="query">
-                    <tags :modelvar="tagsmodel"/>
+                    <tags :modelvar="models.tags"></tags>
                 </div>
 
                 <div class="query pickem">
-                    <picker :modelvar="civmodel" :opts="civs"></picker>
+                    <picker :modelvar="models.civ" :opts="civs"></picker>
 
                     <div class="pickem-down">
-                        <picker :modelvar="typmodel" :opts="types"></picker>
-                        <picker :modelvar="civtypmodel" :opts="civtypes"></picker>
+                        <picker :modelvar="models.typ" :opts="types"></picker>
+                        <picker :modelvar="models.civtyp" :opts="civtypes"></picker>
                     </div>
                 </div>
 
                 <div class="query">
-                    <slider class="sliderman" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
+                    <slider class="sliderman" :modelvar="models.cost" title="COST" :points="cost_points"></slider>
                 
-                    <slider class="sliderman" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
+                    <slider class="sliderman" :modelvar="models.power" title="POWER" :points="power_points"></slider>
 
-                    <slider class="sliderman" :modelvar="setmodel" title="SET" :points="set_points"></slider>
+                    <slider class="sliderman" :modelvar="models.set" title="SET" :points="set_points"></slider>
                 </div>
 
-                <div style="display: flex; justify-content: center; padding: 5px;">
+                <div style="display: flex; justify-content: center;">
                     <b-button square @click="reset()" id="reset-button"></b-button>
                 </div>
             </div>
@@ -129,11 +131,11 @@
                         </div>
                         <div id="civtotal-wrapper">
                             <div class="subtotals">
-                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
-                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
-                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
-                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
-                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
                             </div>
                         </div>
                     </div>
@@ -158,7 +160,6 @@
                 <img v-for="i in [...Array(Math.min(card.count, 4)).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="card.image">
             </div>
         </div>
-
     </div>
 </div>
 

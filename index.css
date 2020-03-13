@@ -51,11 +51,18 @@ html, body, #app {
     margin: 2px;
     display: flex;
     flex-direction: column;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     border-radius: 25px;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
+}
+
+#searchtype {
+    display: flex;
+    justify-content: center;
+    margin-left: 25px;
+    margin-right: 25px;
 }
 
 #deck {
