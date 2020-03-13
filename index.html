@@ -140,7 +140,7 @@
                     <div id="efftotals">
                         <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('shield trigger ('))"><img src="icons/shieldtrigger.png"></totalbadge>
                         <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('blocker ('))"><img src="icons/blocker.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('evolution:'))"><img src="icons/evolutioncreature.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'card type': type}) => type === 'evolution creature'"><img src="icons/evolutioncreature.png"></totalbadge>
                         <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('wave striker ('))"><img src="icons/wavestriker.png"></totalbadge>
                         <totalbadge :getcards="deck_cards" badgevariant="light" :testf="(info) => info.race && info.race.indexOf('survivor') !== -1"><img src="icons/survivor.png"></totalbadge>
                     </div>
