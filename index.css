@@ -41,16 +41,74 @@ html, body, #app {
     padding-bottom: 10px;
 }
 
-#queries {
-    border-radius: 25px;
+#side {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#queries {
     margin: 2px;
     display: flex;
     flex-direction: column;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-radius: 25px;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
+}
+
+#deck {
+    margin-top: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-radius: 25px;
+    background-color: var(--contentcolor);
+    opacity: var(--contentopacity);
+}
+
+#totals {
+    display: flex;
+    margin-right: 25px;
+    margin-left: 25px;
+    margin-top: 7px;
+    margin-bottom: 4px;
+    user-select: none;
+}
+
+.subtotals-total {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.subtotals {
+    flex: 4;
+    display: flex;
+    justify-content: center;
+}
+
+.totalbdg {
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+#deckbuttons {
+    display: flex;
+    justify-content: center;
+    margin-right: 25px;
+    margin-left: 25px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#decktext {
+    flex: 1;
+    margin: 3px;
 }
 
 .query {
@@ -224,4 +282,8 @@ input[class='corer custom-range']::-moz-range-track {
     background-color: var(--controlcolor);
     margin: 2px;
     display: flex;
+}
+
+.card-image:hover {
+    opacity: 0.8;
 }

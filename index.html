@@ -38,8 +38,6 @@
 
     <!--
         PICKER
-        param: opts
-        An array of objects with the "text" and "class" properties set
     -->
     <script type='text/x-template' id='picker'>
         <div class="picker-container">
@@ -49,8 +47,6 @@
 
     <!--
         SLIDER
-        param: points
-        An array of numbers at which the slider points should be located
     -->
 
     <script type='text/x-template' id='slider'>
@@ -74,6 +70,16 @@
         </div>
     </script>
 
+    <!--
+        TOTALBADGE
+    -->
+    <script type='text/x-template' id='totalbadge'>
+        <b-badge class="totalbdg" :variant="badgevariant">
+            <slot></slot>
+            {{ getcards().reduce((total, [count, name]) => total + (applicable && applicable.indexOf(name) !== -1 ? count : 0), 0) }}
+        </b-badge>
+    </script>
+
 <!--
     END TEMPLATES
     END TEMPLATES
@@ -81,35 +87,67 @@
 -->
 
     <div id="site">
-        <div id="queries">
-            
-            <div id="taggroup" class="query">
-                <tags :modi="heh" :modelvar="tagsmodel"/>
-            </div>
 
-            <div class="query pickem">
-                <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
+        <div id="side">
+            <div id="queries">
+                
+                <div id="taggroup" class="query">
+                    <tags :modi="heh" :modelvar="tagsmodel"/>
+                </div>
 
-                <div class="pickem-down">
-                    <picker :modi="heh" :modelvar="typmodel" :opts="types"></picker>
-                    <picker :modi="heh" :modelvar="civtypmodel" :opts="civtypes"></picker>
+                <div class="query pickem">
+                    <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
+
+                    <div class="pickem-down">
+                        <picker :modi="heh" :modelvar="typmodel" :opts="types"></picker>
+                        <picker :modi="heh" :modelvar="civtypmodel" :opts="civtypes"></picker>
+                    </div>
+                </div>
+
+                <div class="query">
+                    <slider class="sliderman" :modi="heh" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
+                
+                    <slider class="sliderman" :modi="heh" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
+
+                    <slider class="sliderman" :modi="heh" :modelvar="setmodel" title="SET" :points="set_points"></slider>
+                </div>
+
+                <div style="display: flex; justify-content: center; padding: 5px;">
+                    <b-button square @click="reset()" id="reset-button"></b-button>
                 </div>
             </div>
 
-            <div class="query">
-                <slider class="sliderman" :modi="heh" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
-            
-                <slider class="sliderman" :modi="heh" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
-
-                <slider class="sliderman" :modi="heh" :modelvar="setmodel" title="SET" :points="set_points"></slider>
+            <div id="deck">
+                <div id="totals">
+                    <div class="subtotals-total">
+                        <totalbadge :getcards="deck_cards" badgevariant="" :testf="_ => true"></totalbadge>
+                    </div>
+                    <div class="subtotals">
+                        <totalbadge :getcards="deck_cards" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
+                    </div>
+                    <div class="subtotals">
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('shield trigger ('))"><img src="icons/shieldtrigger.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('blocker ('))"><img src="icons/blocker.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('evolution:'))"><img src="icons/evolutioncreature.png"></totalbadge>
+                    </div>
+                </div>
+                <textarea id="decktext" v-model="deck.text" rows="20"></textarea>
+                <div id="deckbuttons">
+                    <b-button square v-on:click="deck.text = ''">CLEAR</b-button>
+                </div>
             </div>
 
-            <div style="padding: 5px;">
-                <b-button block @click="reset()" id="reset-button"></b-button>
-            </div>
         </div>
 
-        <div id="cards"/>
+        <div id="cards">
+            <div v-for="card in query_cards" v-on:click="add_card(card)">
+                <img class="card-image" :alt="card" :src="'dm_images/' + card + '.jpg'">
+            </div>
+        </div>
 
     </div>
 </div>
