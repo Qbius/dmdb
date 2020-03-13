@@ -274,16 +274,18 @@ input[class='corer custom-range']::-moz-range-track {
 }
 
 .card-image {
-    width: 222px; 
-    height: 307px;
-    border-radius: 10px;
-    color: var(--contentcolor);
-    text-align: center;
-    background-color: var(--controlcolor);
-    margin: 2px;
-    display: flex;
+    position: absolute;
 }
 
-.card-image:hover {
+.card-container {
+    width: 222px; 
+    position: relative;
+    border-radius: 10px;
+    color: var(--contentcolor);
+    background-color: var(--controlcolor);
+    margin: 2px;
+}
+
+.card-container:hover {
     opacity: 0.8;
 }

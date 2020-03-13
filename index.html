@@ -28,7 +28,7 @@
     <script type='text/x-template' id='tags'>
         <div class="column-container">
             <b-input-group v-for="(row, index) in modelvar.rows">
-                <b-form-tags @input="modi()" @change="modi()" input-id="tags-pills" v-model="modelvar.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
+                <b-form-tags input-id="tags-pills" v-model="modelvar.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
                 <b-input-group-append>
                     <b-button @click="addrow(index)" size="sm" :variant="(modelvar && ((index + 1) == modelvar.rows.length)) ? 'secondary' : 'danger'">{{ (modelvar.rows && ((index + 1) == modelvar.rows.length)) ? '+' : 'X' }}</b-button>
                 </b-input-group-append>
@@ -41,7 +41,7 @@
     -->
     <script type='text/x-template' id='picker'>
         <div class="picker-container">
-            <b-form-checkbox pill class="picker-item" @input="modi()" v-for="opt in opts" @change="conflict(opt.value)" v-model="modelvar[opt.value]" name="whatever" :size="opt.size" button squared :button-variant="opt.variant"><font size="1">{{opt.text}}</font></b-form-checkbox>
+            <b-form-checkbox pill class="picker-item" v-for="opt in opts" @change="conflict(opt.value)" v-model="modelvar[opt.value]" name="whatever" :size="opt.size" button squared :button-variant="opt.variant"><font size="1">{{opt.text}}</font></b-form-checkbox>
         </div>
     </script>
 
@@ -64,8 +64,8 @@
             </div>
             <div class="slider-proper">
                 <b-form-input ref="background_slider" class="corer" style="position: absolute; z-index: 1;" type="range" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
-                <b-form-input class="thumb" @input="update()" @change="instantupdate()" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.lower" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
-                <b-form-input class="thumb" @input="update()" @change="instantupdate()" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.upper" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 2;" type="range" v-model="modelvar.lower" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
+                <b-form-input class="thumb" @input="update()" style="position: absolute; z-index: 3;" type="range" v-model="modelvar.upper" :min="points[0]" :max="points[1]" :step="points[2]"></b-form-input>
             </div>
         </div>
     </script>
@@ -76,7 +76,7 @@
     <script type='text/x-template' id='totalbadge'>
         <b-badge class="totalbdg" :variant="badgevariant">
             <slot></slot>
-            {{ getcards().reduce((total, [count, name]) => total + (applicable && applicable.indexOf(name) !== -1 ? count : 0), 0) }}
+            {{ getcards() ? Object.entries(getcards()).reduce((total, [name, count]) => total + (applicable && applicable.indexOf(name.toLowerCase()) !== -1 ? count : 0), 0) : "" }}
         </b-badge>
     </script>
 
@@ -90,26 +90,28 @@
 
         <div id="side">
             <div id="queries">
+
+                <picker :modelvar="searchtypemodel" :opts="searchtypes"></picker>
                 
                 <div id="taggroup" class="query">
-                    <tags :modi="heh" :modelvar="tagsmodel"/>
+                    <tags :modelvar="tagsmodel"/>
                 </div>
 
                 <div class="query pickem">
-                    <picker :modi="heh" :modelvar="civmodel" :opts="civs"></picker>
+                    <picker :modelvar="civmodel" :opts="civs"></picker>
 
                     <div class="pickem-down">
-                        <picker :modi="heh" :modelvar="typmodel" :opts="types"></picker>
-                        <picker :modi="heh" :modelvar="civtypmodel" :opts="civtypes"></picker>
+                        <picker :modelvar="typmodel" :opts="types"></picker>
+                        <picker :modelvar="civtypmodel" :opts="civtypes"></picker>
                     </div>
                 </div>
 
                 <div class="query">
-                    <slider class="sliderman" :modi="heh" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
+                    <slider class="sliderman" :modelvar="costmodel" title="COST" :points="cost_points"></slider>
                 
-                    <slider class="sliderman" :modi="heh" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
+                    <slider class="sliderman" :modelvar="powermodel" title="POWER" :points="power_points"></slider>
 
-                    <slider class="sliderman" :modi="heh" :modelvar="setmodel" title="SET" :points="set_points"></slider>
+                    <slider class="sliderman" :modelvar="setmodel" title="SET" :points="set_points"></slider>
                 </div>
 
                 <div style="display: flex; justify-content: center; padding: 5px;">
@@ -144,8 +146,8 @@
         </div>
 
         <div id="cards">
-            <div v-for="card in query_cards" v-on:click="add_card(card)">
-                <img class="card-image" :alt="card" :src="'dm_images/' + card + '.jpg'">
+            <div class="card-container" v-for="card in queried_cards" :style="'height: ' + (307 + 20 * (card.count - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
+                <img v-for="i in [...Array(card.count).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="'dm_images/' + card.name + '.jpg'">
             </div>
         </div>
 
