@@ -167,7 +167,7 @@
         </div>
 
         <div id="cards">
-            <div class="card-container" v-for="(card, index) in queried_cards" :style="'height: ' + (307 + 20 * (Math.min(card.count, 4) - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
+            <div class="card-container" v-for="(card, index) in queried_cards" :key="card.name" :style="'height: ' + (307 + 20 * (Math.min(card.count, 4) - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
                 <img v-if="index < cards_shown" v-for="i in [...Array(Math.min(card.count, 4)).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="card.image">
             </div>
         </div>
