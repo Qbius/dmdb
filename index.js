@@ -771,3 +771,6 @@ app.reset();
 $('#reset-button').html('RESET');
 document.getElementById('cards').addEventListener('scroll', app.update_visible_cards_count);
 app.update_visible_cards_count();
+
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('noo')) console.log(urlParams.get('noo'));
