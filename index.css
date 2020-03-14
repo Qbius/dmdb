@@ -136,9 +136,47 @@ html, body, #app {
     margin-bottom: 4px;
 }
 
-#decktext {
+#decktextcontainer {
     flex: 1;
     margin: 3px;
+    position: relative;
+    display: flex;
+}
+
+#deckoverlay-container {
+    position: absolute;
+    z-index: 1;
+    flex: 1;
+    border: 1px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+.deckoverlay {
+    height: 24px;
+    display: flex;
+    padding-right: 5px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.deckoverlay-icon-wrapper {
+    width: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.deckoverlay-icon {
+    margin-right: 2px;
+}
+
+#decktext {
+    z-index: 0;
+    flex: 1;
+    position: absolute;
+    width: inherit;
 }
 
 .query {

@@ -417,6 +417,75 @@ const ratuj = [
     "unified resistance",
 ];
 
+const baits = {
+    "ladia bale, the inspirational": ['guardian'],
+    "crystal paladin": ['liquid people'],
+    "ultracide worm": ['parasite worm'],
+    "armored blaster valdios": ['human'],
+    "fighter dual fang": ['beast folk'],
+    "larba geer, the immaculate": ['guardian'],
+    "crystal lancer": ['liquid people'],
+    "chaos worm": ['parasite worm'],
+    "armored cannon balbaro": ['human'],
+    "barkwhip, the smasher": ['beast folk'],
+    "sieg balicula, the intense": ['initiate'],
+    "legendary bynor": ['leviathan'],
+    "jack viper, shadow of doom": ['ghost'],
+    "uberdragon jabaha": ['armored dragon'],
+    "gigamantis": ['giant insect'],
+    "ballom, master of death": ['demon command'],
+    "niofa, horned protector": ['horned beast'],
+    "alcadeias, lord of spirits": ['angel command'],
+    "astral warper": ['cyber virus'],
+    "doboulgyser, giant rock beast": ['rock beast'],
+    "craze valkyrie, the drastic": ['initiate'],
+    "crystal jouster": ['liquid people'],
+    "q-tronic hypermind": ['survivor'],
+    "phantasmal horror gigazald": ['chimera'],
+    "lava walker executo": ['dragonoid'],
+    "ultra mantis, scourge of fate": ['giant insect'],
+    "arc bine, the astounding": ['guardian'],
+    "fort megacluster": ['cyber cluster'],
+    "frost specter, shadow of age": ['ghost'],
+    "armored decimator valkaizer": ['human'],
+    "q-tronic gargantua": ['survivor'],
+    "living citadel vosh": ['colony beetle'],
+    "cosmic nebula": ['cyber virus'],
+    "kizar basiku, the outrageous": ['initiate'],
+    "phantasmal horror gigazabal": ['chimera'],
+    "valkrowzer, ultra rock beast": ['rock beast'],
+    "world tree, root of life": ['tree folk'],
+    "emperor quazla": ['cyber lord'],
+    "super necrodragon abzo dolba": ['dragon'],
+    "uberdragon bajula": ['dragon'],
+    "super terradragon bailas gale": ['dragon'],
+    "kuukai, finder of karma": ['mecha thunder'],
+    "glena vuele, the hypnotic": ['guardian'],
+    "azaghast, tyrant of shadows": ['dark lord'],
+    "balesk baj, the timeburner": ['armored wyvern'],
+    "emperor maroll": ['cyber lord'],
+    "storm wrangler, the furious": ['beast folk'],
+    "glais mejicula, the extreme": ['initiate'],
+    "crystal spinslicer": ['liquid people'],
+    "zero nemesis, shadow of panic": ['ghost'],
+    "armored raider gandaval": ['human'],
+    "earth ripper, talon of rage": ['beast folk'],
+    "warlord ailzonius": ['gladiator'],
+    "evil incarnate": ['devil mask'],
+    "diamondia, the blizzard rider": ['snow faerie'],
+    "jabaha's automaton": ['xenoparts'],
+    "wise starnoid, avatar of hope": ['light bringer', 'cyber lord'],
+    "cruel naga, avatar of fate": ['merfolk', 'chimera'],
+    "death phoenix, avatar of doom": ['zombie dragon', 'fire bird'],
+    "aura pegasus, avatar of life": ['horned beast', 'angel command'],
+    "soul phoenix, avatar of unity": ['fire bird', 'earth dragon'],
+    "agira, the warlord crawler": ['gladiator', 'earth eater'],
+    "hydrooze, the mutant emperor": ['cyber lord', 'hedrian'],
+    "phantomach, the gigatrooper": ['chimera', 'armorloid'],
+    "nemonex, bajula's robomantis": ['xenoparts', 'giant insect'],
+    "comet eye, the spectral spud": ['wild veggies', 'rainbow phantom']
+}
+
 const tiers = {"ou": Ubers, "uu": [...Ubers, ...OU], "ru": [...Ubers, ...OU, ...UU], "pu": [...Ubers, ...OU, ...UU, ...RU]};
 
 const special = {
@@ -552,6 +621,8 @@ var app = new Vue({
         power_points: [0, 15000, 500],
         
         set_points: [1, 12, 1],
+
+        cards_shown: 0,
         
         // throwaway variables to disable warnings
         opt: "",
@@ -570,7 +641,15 @@ var app = new Vue({
         getcards: () => {},
         always: "",
 
-        vue: this,
+        // counters
+        is: {
+            shield_trigger: ({'effect': effects}) => effects.some(eff => eff.startsWith('shield trigger (')),
+            blocker: ({'effect': effects}) => effects.some(eff => eff.startsWith('blocker (')),
+            evolution: ({'card type': type}) => type === 'evolution creature',
+            wave_striker: ({'effect': effects}) => effects.some(eff => eff.startsWith('wave striker (')),
+            survivor: (info) => info.race && info.race.indexOf('survivor') !== -1,
+        },
+
         // v-model variables
         searchtypemodel: {data: {tcg: true, deck: false}},
         models: {
@@ -601,13 +680,16 @@ var app = new Vue({
         },
         deck: {text: ""},
     },
+    created() {
+        window.addEventListener('scroll', this.update_visible_cards_count);
+    },
     methods: {
         reset() {
             Object.values(this.models).forEach(model => model.reset());
         },
         deck_cards() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
-            const res = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => Object.assign(obj, {[name.toLowerCase()]: count}), {});
+            const res = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
             return res;
         },
         add_card(card) {
@@ -631,11 +713,49 @@ var app = new Vue({
                     this.deck.text = this.deck.text.split('\n').filter(line => line !== card_line).join('\n');
                 }
             }
+        },
+        is_card(card) {
+            return card.toLowerCase() in tcg;
+        },
+        cardinfo(card) {
+            return (card.toLowerCase() in tcg) ? tcg[card.toLowerCase()] : {};
+        },
+        evolution_baits_count(card_upper_case) {
+            const card = card_upper_case.toLowerCase();
+            if (!(card in baits)) return;
+
+            const applicable_races = (baits[card] == ['dragon']) ? ['armored dragon', 'earth dragon', 'zombie dragon', 'dragon zombie', 'volcano dragon'] : baits[card];
+            const is_evo_bait = ({'card type': type, 'race': races}) => (type !== 'evolution creature') && races && races.some(race => applicable_races.indexOf(race) !== -1);
+            return Object.entries(this.deck_cards()).reduce((sum, [name, count]) => sum + (is_evo_bait(tcg[name]) ? count : 0), 0);
+        },
+        civ_color(card) {
+            const civ = tcg[card.toLowerCase()] ? tcg[card.toLowerCase()]['civilization'][0] : undefined;
+            const civcolors =  {
+                fire: "red",
+                darkness: "black",
+                water: "blue",
+                light: "yellow",
+                nature: "green",
+            };
+            return (civ in civcolors) ? civcolors[civ] : "white";
+        },
+        el_property(id, prop) {
+            const el = document.getElementById(id);
+            return el.currentStyle ? x.currentStyle[prop] : document.defaultView.getComputedStyle(el, null).getPropertyValue(prop);
+        },
+        update_visible_cards_count() {
+            const cards_per_row = Math.floor(Math.round(this.el_property('cards', 'width').split(/[^\d]/)[0]) / 226);
+            const rows_visible = Math.ceil((Math.round(this.el_property('cards', 'height').split(/[^\d]/)[0]) + document.getElementById("cards").scrollTop) / 311);
+            const new_cards_shown = cards_per_row * rows_visible; 
+            if (new_cards_shown !== this.cards_shown) {
+                this.cards_shown = new_cards_shown;
+                this.$forceUpdate();
+            }
         }
     },
     computed: {
-        unique_deck_cards() {
-            return this.deck.text.split('\n').map(line => line.trim().substring(card.search(' ')).trim()).filter(line => line.length !== 0);
+        deck_lines() {
+            return this.deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
         },
         queried_cards() {
             const deckcards = this.deck_cards();
@@ -643,9 +763,11 @@ var app = new Vue({
             const filtered = Object.keys(this.searchtypemodel.data.tcg ? tcg : deckcards).filter(key => modified_models.every(([n, m]) => m.test(tcg[key]))).sort();
             const dogegg = this.models.tags.data.rows.some(row => row.some(tag => tag.toLowerCase() === "doge"));
             return filtered.map(card => ({name: card, count: (this.searchtypemodel.data.tcg ? 1 : deckcards[card]), image: ('dm_images/' + ((card == "holy awe" && dogegg) ? 'holydoge' : card) + '.jpg')}));
-        },
+        }
     }
 });
 
 app.reset();
 $('#reset-button').html('RESET');
+document.getElementById('cards').addEventListener('scroll', app.update_visible_cards_count);
+app.update_visible_cards_count();

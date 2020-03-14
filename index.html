@@ -140,14 +140,25 @@
                         </div>
                     </div>
                     <div id="efftotals">
-                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('shield trigger ('))"><img src="icons/shieldtrigger.png"></totalbadge>
-                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('blocker ('))"><img src="icons/blocker.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'card type': type}) => type === 'evolution creature'"><img src="icons/evolutioncreature.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="({'effect': effects}) => effects.some(eff => eff.startsWith('wave striker ('))"><img src="icons/wavestriker.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="(info) => info.race && info.race.indexOf('survivor') !== -1"><img src="icons/survivor.png"></totalbadge>
+                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="is.shield_trigger"><img src="icons/shieldtrigger.png"></totalbadge>
+                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="is.blocker"><img src="icons/blocker.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="is.evolution"><img src="icons/evolutioncreature.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="is.wave_striker"><img src="icons/wavestriker.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="is.survivor"><img src="icons/survivor.png"></totalbadge>
                     </div>
                 </div>
-                <textarea id="decktext" v-model="deck.text" rows="20"></textarea>
+                <div id="decktextcontainer">
+                    <textarea id="decktext" :style="'width: ' + el_property('decktextcontainer', 'width') + ';'" v-model="deck.text" rows="20"></textarea>
+                    <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
+                        <div v-for="card in deck_lines" class="deckoverlay">
+                            <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/shieldtrigger.png"></div>
+                            <div v-if="is_card(card) && is.blocker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/blocker.png"></div>
+                            <div v-if="is_card(card) && is.evolution(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/evolutioncreature.png"><font size="1px">{{ evolution_baits_count(card).toString() }}</font></div>
+                            <div v-if="is_card(card) && is.survivor(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/survivor.png"></div>
+                            <div v-if="is_card(card) && is.wave_striker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/wavestriker.png"></div>
+                        </div>
+                    </div>
+                </div>
                 <div id="deckbuttons">
                     <b-button square v-on:click="deck.text = ''">CLEAR</b-button>
                 </div>
@@ -156,8 +167,8 @@
         </div>
 
         <div id="cards">
-            <div class="card-container" v-for="card in queried_cards" :style="'height: ' + (307 + 20 * (Math.min(card.count, 4) - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
-                <img v-for="i in [...Array(Math.min(card.count, 4)).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="card.image">
+            <div class="card-container" v-for="(card, index) in queried_cards" :style="'height: ' + (307 + 20 * (Math.min(card.count, 4) - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
+                <img v-if="index < cards_shown" v-for="i in [...Array(Math.min(card.count, 4)).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="card.image">
             </div>
         </div>
     </div>
