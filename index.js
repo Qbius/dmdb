@@ -654,7 +654,7 @@ var app = new Vue({
         searchtypemodel: {data: {tcg: true, deck: false}},
         models: {
             tags: new Model({rows: [[]]}, ({'name': cardname, 'effect': cardeffe, 'rarity': cardrari, 'race': cardrace}, model) => {
-                const tag_check_f = tag => (tag in special) ? special[tag](tag, key) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
+                const tag_check_f = tag => (tag in special) ? special[tag](tag, cardname.toLowerCase()) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
                 const tag_checking_f = tag => (tag[0] === '!' ? !tag_check_f(tag.split('!').splice(1).join('!')) : tag_check_f(tag));
                 const processed_tags = model.data.rows.filter(row => row.length > 0);
                 return processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
