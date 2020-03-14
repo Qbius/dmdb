@@ -725,7 +725,7 @@ var app = new Vue({
             if (!(card in baits)) return;
 
             const applicable_races = (baits[card] == ['dragon']) ? ['armored dragon', 'earth dragon', 'zombie dragon', 'dragon zombie', 'volcano dragon'] : baits[card];
-            const is_evo_bait = ({'card type': type, 'race': races}) => (type !== 'evolution creature') && races && races.some(race => applicable_races.indexOf(race) !== -1);
+            const is_evo_bait = ({'name': name, 'card type': type, 'race': races}) => (type !== 'evolution creature') && (races && races.some(race => applicable_races.indexOf(race) !== -1) || (name === "Innocent Hunter, Blade of All"));
             return Object.entries(this.deck_cards()).reduce((sum, [name, count]) => sum + (is_evo_bait(tcg[name]) ? count : 0), 0);
         },
         civ_color(card) {
