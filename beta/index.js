@@ -726,9 +726,6 @@ var app = new Vue({
                 }
             }
         },
-        deck_column(column) {
-            return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
-        },
         is_card(card) {
             return card.toLowerCase() in tcg;
         },
