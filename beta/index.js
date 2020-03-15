@@ -670,6 +670,27 @@ var app = new Vue({
 
         // v-model variables
         searchtypemodel: 'tcg',
+        sorting: {
+            type: 'alphabetical',
+            function: {
+                alphabetical: (a, b) => (a < b) ? -1 : ((a > b) ? 1 : 0),
+                cost: (pa, pb) => {
+                    const{'mana cost': acost} = tcg[pa.toLowerCase()];
+                    const{'mana cost': bcost} = tcg[pb.toLowerCase()];
+                    
+                    return (acost < bcost) ? -1 : ((acost > bcost) ? 1 : 0);
+                },
+                civ: (pa, pb) => {
+                    const{'civilization': aciv} = tcg[pa.toLowerCase()];
+                    const{'civilization': bciv} = tcg[pb.toLowerCase()];
+                    
+                    if (aciv.length < bciv.length) return -1;
+                    else if (aciv.length > bciv.length) return 1;
+                    else if (aciv.length === 1) return (aciv[0] < bciv[0]) ? -1 : ((aciv[0] > bciv[0]) ? 1 : 0)
+                    else return (aciv[0] < bciv[0]) ? -1 : ((aciv[0] > bciv[0]) ? 1 : ((aciv[1] < bciv[1]) ? -1 : ((aciv[1] > bciv[1]) ? 1 : 0)));
+                },
+            }
+        },
         models: {
             tags: new Model({rows: [[]]}, ({'name': cardname, 'effect': cardeffe, 'rarity': cardrari, 'race': cardrace}, model) => {
                 const tag_check_f = tag => (tag in special) ? special[tag](tag, cardname.toLowerCase()) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
@@ -800,6 +821,10 @@ var app = new Vue({
                 div.appendChild(img);
             }, index);
         });
+
+        for (let el of document.getElementsByClassName('deckoverlay')) {
+            el.addEventListener('mouseover', () => !console.log("hehe") && (el.style.background_color = "red"));
+        }
     },
     computed: {
         cards_per_row() {
@@ -817,7 +842,7 @@ var app = new Vue({
             return this.deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
         },
         cards() {
-            return Object.keys(tcg).sort();
+            return Object.keys(tcg).sort(this.sorting.function[this.sorting.type]);
         },
         deck_cards() {
             return this.cards.filter(c => this.show[c] && c in this.deck_cards_to_count);

@@ -116,8 +116,9 @@
                     <slider class="sliderman" :modelvar="models.set" title="SET" :points="set_points"></slider>
                 </div>
 
-                <div style="display: flex; justify-content: center;">
-                    <b-button square @click="reset()">RESET</b-button>
+                <div style="display: flex; align-items: center; justify-content: space-around;">
+                    <b-form-radio-group v-model="sorting.type" :options="[{text: 'A-Z', value: 'alphabetical'}, {text: 'Cost', value: 'cost'}, {text: 'Civ', value: 'civ'}]" buttons size="sm"></b-form-radio-group>
+                    <b-button square size="sm" @click="reset()">RESET</b-button>
                 </div>
             </div>
 
