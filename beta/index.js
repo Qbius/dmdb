@@ -604,7 +604,7 @@ const Model = class {
 }
 
 if (!localStorage.dmdb) {
-    localStorage.dmdb = '{"decks": [{"name": "New deck", "text": ""}]}';
+    localStorage.dmdb = '{"deck_index": 0, "decks": [{"name": "New deck", "text": ""}]}';
 }
 
 var app = new Vue({
@@ -657,7 +657,6 @@ var app = new Vue({
         addcard: "",
         getcards: () => {},
         always: "",
-        deck_index: 0,
         storage: JSON.parse(localStorage.dmdb),
         tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
@@ -738,7 +737,7 @@ var app = new Vue({
             setTimeout(() => this.deck_index = this.storage.decks.length - 1, 1);
         },
         tabclicked(index, decktitle) {
-            if (index === this.deck_index) {
+            if (index === this.storage.deck_index) {
                 this.tabedits[index] = true;
                 this.$forceUpdate();
                 setTimeout(() => document.getElementById('tab' + index.toString() + 'input').focus());
@@ -811,7 +810,7 @@ var app = new Vue({
             const res = deckcode.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
             this.storage.decks.push({name: decktitle ? decktitle : 'New deck', text: res});
             setTimeout(() => {
-                this.deck_index = this.storage.decks.length - 1
+                this.storage.deck_index = this.storage.decks.length - 1
                 this.searchtypemodel = 'deck';
             });
         },
@@ -888,7 +887,7 @@ var app = new Vue({
             return this.searchtypemodel === "deck";
         },
         active_deck() {
-            return this.storage.decks[this.deck_index];
+            return this.storage.decks[this.storage.deck_index];
         },
         show() {
             const modified_models = Object.values(this.models).filter(model => model.modified);
