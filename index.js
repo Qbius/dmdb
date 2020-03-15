@@ -772,6 +772,10 @@ var app = new Vue({
             this.searchtypemodel.data.tcg = false;
             this.$forceUpdate();
         },
+        copy_deck() {
+            document.getElementById('decktext').select();
+            document.execCommand('copy');
+        },
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             const deckcode = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).filter(([count, name]) => count > 0).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
