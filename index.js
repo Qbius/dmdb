@@ -573,8 +573,8 @@ const base62 = {
 
 const Model = class {
     constructor(defvalue, testf) {
-        this.default = {...defvalue};
-        this.data = {...defvalue};
+        this.default = JSON.parse(JSON.stringify(defvalue));
+        this.data = JSON.parse(JSON.stringify(defvalue));
         this.testf = testf;
     }
     get modified() {
@@ -588,7 +588,7 @@ const Model = class {
         }
     }
     reset() {
-        this.data = {...this.default};
+        this.data = JSON.parse(JSON.stringify(this.default));
     }
     test(cardinfo) {
         return this.testf(cardinfo, this);
