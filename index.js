@@ -775,9 +775,10 @@ var app = new Vue({
         decktext.style.width = this.el_property('decktextcontainer', 'width');
         decktext.style.height = (Math.round(this.el_property('decktextcontainer', 'height').split(/[^\d]/)[0]) - 20).toString() + 'px';
 
-        $("#decktext").scroll(() => { 
-            $("#deckoverlay-container").scrollTop($("#decktext").scrollTop());
-            $("#deckoverlay-container").scrollLeft($("#decktext").scrollLeft());
+        let decktextarea = document.getElementById('decktext');
+        decktextarea.addEventListener('scroll', () => {
+            console.log("he");
+            document.getElementById("deckoverlay-container-wrapper").scrollTop = decktextarea.scrollTop;
         });
     },
     computed: {

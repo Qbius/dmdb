@@ -149,13 +149,15 @@
                 </div>
                 <div id="decktextcontainer">
                     <textarea id="decktext" :style="decktext_style" v-model="deck.text"></textarea>
-                    <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
-                        <div v-for="card in deck_lines" class="deckoverlay">
-                            <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/shieldtrigger.png"></div>
-                            <div v-if="is_card(card) && is.blocker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/blocker.png"></div>
-                            <div v-if="is_card(card) && is.evolution(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/evolutioncreature.png"><font size="1px">{{ evolution_baits_count(card).toString() }}</font></div>
-                            <div v-if="is_card(card) && is.survivor(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/survivor.png"></div>
-                            <div v-if="is_card(card) && is.wave_striker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/wavestriker.png"></div>
+                    <div id="deckoverlay-container-wrapper">
+                        <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
+                            <div v-for="card in deck_lines" class="deckoverlay">
+                                <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/shieldtrigger.png"></div>
+                                <div v-if="is_card(card) && is.blocker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/blocker.png"></div>
+                                <div v-if="is_card(card) && is.evolution(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/evolutioncreature.png"><font size="1px">{{ evolution_baits_count(card).toString() }}</font></div>
+                                <div v-if="is_card(card) && is.survivor(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/survivor.png"></div>
+                                <div v-if="is_card(card) && is.wave_striker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/wavestriker.png"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

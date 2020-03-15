@@ -143,25 +143,29 @@ html, body, #app {
     display: flex;
 }
 
-#deckoverlay-container {
+#deckoverlay-container-wrapper {
     position: absolute;
     z-index: 1;
     flex: 1;
     border: 1px;
-    margin-top: 4px;
-    display: flex;
-    flex-direction: column;
     pointer-events: none;
     overflow-y: scroll;
     scrollbar-width: none;
 }
 
-#deckoverlay-container::-webkit-scrollbar {
+#deckoverlay-container-wrapper::-webkit-scrollbar {
     width: 0;
     height: 0;
 }
 
+#deckoverlay-container {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
 .deckoverlay {
+    min-height: 24px;
     height: 24px;
     display: flex;
     padding-right: 5px;
