@@ -793,7 +793,7 @@ var app = new Vue({
             let img_src = this.card_image(div.getAttribute('card'));
             setTimeout(() => {
                 let img = document.createElement('img');
-                img.class = 'card-image';
+                img.setAttribute('class', 'card-image');
                 img.src = img_src;
                 div.appendChild(img);
             }, index);

@@ -148,7 +148,7 @@
                     </div>
                 </div>
                 <div id="decktextcontainer">
-                    <textarea id="decktext" :style="decktext_style" v-model="deck.text"></textarea>
+                    <textarea id="decktext" spellcheck="false" :style="decktext_style" v-model="deck.text"></textarea>
                     <div id="deckoverlay-container-wrapper">
                         <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
                             <div v-for="card in deck_lines" class="deckoverlay">
