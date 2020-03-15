@@ -236,12 +236,6 @@ html, body, #app {
     padding-bottom: 0px!important;
 }
 
-.btn-secondary {
-    width: 80px!important;
-    margin-right: 1px;
-    margin-left: 1px;
-}
-
 .close {
     display: none!important;
 }
