@@ -553,7 +553,7 @@ Vue.component('totalbadge', {
     },
     computed: {
         count() {
-            return this.getcards() ? Object.entries(this.getcards()).reduce((total, [name, count]) => total + (this.applicable && this.applicable.indexOf(name.toLowerCase()) !== -1 ? count : 0), 0) : ""
+            return this.getcards ? Object.entries(this.getcards).reduce((total, [name, count]) => total + (this.applicable && this.applicable.indexOf(name.toLowerCase()) !== -1 ? count : 0), 0) : ""
         }
     }
 });
@@ -693,17 +693,9 @@ var app = new Vue({
         },
         deck: {text: ""},
     },
-    created() {
-        window.addEventListener('scroll', this.update_visible_cards_count);
-    },
     methods: {
         reset() {
             Object.values(this.models).forEach(model => model.reset());
-        },
-        deck_cards() {
-            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
-            const res = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
-            return res;
         },
         add_card(card) {
             if (this.deck.text.toLowerCase().includes(card)) {
@@ -727,6 +719,9 @@ var app = new Vue({
                 }
             }
         },
+        deck_column(column) {
+            return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
+        },
         is_card(card) {
             return card.toLowerCase() in tcg;
         },
@@ -739,31 +734,14 @@ var app = new Vue({
 
             const applicable_races = (baits[card] == ['dragon']) ? ['armored dragon', 'earth dragon', 'zombie dragon', 'dragon zombie', 'volcano dragon'] : baits[card];
             const is_evo_bait = ({'name': name, 'card type': type, 'race': races}) => (type !== 'evolution creature') && (races && races.some(race => applicable_races.indexOf(race) !== -1) || (name === "Innocent Hunter, Blade of All"));
-            return Object.entries(this.deck_cards()).reduce((sum, [name, count]) => sum + (is_evo_bait(tcg[name]) ? count : 0), 0);
+            return Object.entries(this.deck_cards_to_count).reduce((sum, [name, count]) => sum + (is_evo_bait(tcg[name]) ? count : 0), 0);
         },
-        civ_color(card) {
-            const civ = tcg[card.toLowerCase()] ? tcg[card.toLowerCase()]['civilization'][0] : undefined;
-            const civcolors =  {
-                fire: "red",
-                darkness: "black",
-                water: "blue",
-                light: "yellow",
-                nature: "green",
-            };
-            return (civ in civcolors) ? civcolors[civ] : "white";
+        card_image(card) {
+            return 'dm_images/' + card + '.jpg';
         },
         el_property(id, prop) {
             const el = document.getElementById(id);
             return el.currentStyle ? x.currentStyle[prop] : document.defaultView.getComputedStyle(el, null).getPropertyValue(prop);
-        },
-        update_visible_cards_count() {
-            const cards_per_row = Math.floor(Math.round(this.el_property('cards', 'width').split(/[^\d]/)[0]) / 226);
-            const rows_visible = Math.ceil((Math.round(this.el_property('cards', 'height').split(/[^\d]/)[0]) + document.getElementById("cards").scrollTop) / 311);
-            const new_cards_shown = cards_per_row * rows_visible; 
-            if (new_cards_shown !== this.cards_shown) {
-                this.cards_shown = new_cards_shown;
-                this.$forceUpdate();
-            }
         },
         init_from_deck(deckstr) {
             const res = deckstr.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
@@ -790,26 +768,32 @@ var app = new Vue({
             el.value = url;
             el.select();
             document.execCommand('copy');
-        }
+        },
     },
     computed: {
+        cards_per_row() {
+            return Math.floor(Math.round(this.el_property('cards', 'width').split(/[^\d]/)[0]) / 226);
+        },
+        deck_cards_to_count() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            const res = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
+            return res;
+        },
         deck_lines() {
             return this.deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
         },
-        queried_cards() {
-            const deckcards = this.deck_cards();
-            const modified_models = Object.entries(this.models).filter(([name, model]) => model.modified);
-            const filtered = Object.keys(this.searchtypemodel.data.tcg ? tcg : deckcards).filter(key => modified_models.every(([n, m]) => m.test(tcg[key]))).sort();
-            const dogegg = this.models.tags.data.rows.some(row => row.some(tag => tag.toLowerCase() === "doge"));
-            return filtered.map(card => ({name: card, count: (this.searchtypemodel.data.tcg ? 1 : deckcards[card]), image: ('dm_images/' + ((card == "holy awe" && dogegg) ? 'holydoge' : card) + '.jpg')}));
+        cards() {
+            return Object.keys(tcg).sort();
+        },
+        deck_cards() {
+            return this.cards.filter(c => this.show[c] && c in this.deck_cards_to_count);
+        },
+        show() {
+            const modified_models = Object.values(this.models).filter(model => model.modified);
+            return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: modified_models.every(model => model.test(tcg[card]))}), {});
         }
     }
 });
-
-app.reset();
-$('#reset-button').html('RESET');
-document.getElementById('cards').addEventListener('scroll', app.update_visible_cards_count);
-app.update_visible_cards_count();
 
 var urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('shared')) app.init_from_deck(urlParams.get('shared'));

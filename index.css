@@ -328,12 +328,23 @@ input[class='corer custom-range']::-moz-range-track {
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
     overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+#cards-queried {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
     align-content: flex-start;
     margin: 1px;
-    scrollbar-width: none;
+}
+
+#cards-deck {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin: 1px;
 }
 
 #cards::-webkit-scrollbar {
@@ -341,16 +352,18 @@ input[class='corer custom-range']::-moz-range-track {
     height: 0;
 }
 
-.card-image {
-    position: absolute;
+.deck-vertical-container {
+    display: flex;
+    flex-direction: column;
 }
 
 .card-container {
-    width: 222px; 
-    position: relative;
     border-radius: 10px;
-    color: var(--contentcolor);
-    background-color: var(--controlcolor);
+    margin: 2px;
+    position: relative;
+}
+
+.card-image {
     margin: 2px;
 }
 

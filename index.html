@@ -126,25 +126,25 @@
                     <div id="civtotals">
                         <div id="tottotal-wrapper">
                             <div class="subtotals-total">
-                                <totalbadge :always="true" :getcards="deck_cards" badgevariant="" :testf="_ => true"></totalbadge>
+                                <totalbadge :always="true" :getcards="deck_cards_to_count" badgevariant="" :testf="_ => true"></totalbadge>
                             </div>
                         </div>
                         <div id="civtotal-wrapper">
                             <div class="subtotals">
-                                <totalbadge :getcards="deck_cards" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
-                                <totalbadge :getcards="deck_cards" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
-                                <totalbadge :getcards="deck_cards" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
-                                <totalbadge :getcards="deck_cards" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
-                                <totalbadge :getcards="deck_cards" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards_to_count" badgevariant="danger" :testf="({'civilization': civs}) => civs.indexOf('fire') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards_to_count" badgevariant="dark" :testf="({'civilization': civs}) => civs.indexOf('darkness') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards_to_count" badgevariant="primary" :testf="({'civilization': civs}) => civs.indexOf('water') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards_to_count" badgevariant="success" :testf="({'civilization': civs}) => civs.indexOf('nature') !== -1"></totalbadge>
+                                <totalbadge :getcards="deck_cards_to_count" badgevariant="warning" :testf="({'civilization': civs}) => civs.indexOf('light') !== -1"></totalbadge>
                             </div>
                         </div>
                     </div>
                     <div id="efftotals">
-                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="is.shield_trigger"><img src="icons/shieldtrigger.png"></totalbadge>
-                        <totalbadge :always="true" :getcards="deck_cards" badgevariant="light" :testf="is.blocker"><img src="icons/blocker.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="is.evolution"><img src="icons/evolutioncreature.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="is.wave_striker"><img src="icons/wavestriker.png"></totalbadge>
-                        <totalbadge :getcards="deck_cards" badgevariant="light" :testf="is.survivor"><img src="icons/survivor.png"></totalbadge>
+                        <totalbadge :always="true" :getcards="deck_cards_to_count" badgevariant="light" :testf="is.shield_trigger"><img src="icons/shieldtrigger.png"></totalbadge>
+                        <totalbadge :always="true" :getcards="deck_cards_to_count" badgevariant="light" :testf="is.blocker"><img src="icons/blocker.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards_to_count" badgevariant="light" :testf="is.evolution"><img src="icons/evolutioncreature.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards_to_count" badgevariant="light" :testf="is.wave_striker"><img src="icons/wavestriker.png"></totalbadge>
+                        <totalbadge :getcards="deck_cards_to_count" badgevariant="light" :testf="is.survivor"><img src="icons/survivor.png"></totalbadge>
                     </div>
                 </div>
                 <div id="decktextcontainer">
@@ -170,8 +170,15 @@
         </div>
 
         <div id="cards">
-            <div class="card-container" v-for="(card, index) in queried_cards" :key="card.name" :style="'height: ' + (307 + 20 * (Math.min(card.count, 4) - 1)) + 'px'" v-on:click="add_card(card.name)" @contextmenu="$event.preventDefault(); remove_card(card.name)">
-                <img v-if="index < cards_shown" v-for="i in [...Array(Math.min(card.count, 4)).keys()]" :style="'top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card.name" :src="card.image">
+            <div id="cards-queried" v-show="searchtypemodel.data.tcg">
+                <img v-for="card in cards" class="card-image" v-show="show[card]" :alt="card" :src="card_image(card)" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+            </div>
+            <div id="cards-deck" v-show="searchtypemodel.data.deck">
+                <div v-for="column in [...Array(cards_per_row).keys()]" class="deck-vertical-container">
+                    <div class="card-container" v-for="card in deck_column(column)" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+                        <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
