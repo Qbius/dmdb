@@ -726,9 +726,6 @@ var app = new Vue({
                 }
             }
         },
-        deck_column(column) {
-            return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
-        },
         is_card(card) {
             return card.toLowerCase() in tcg;
         },
@@ -776,6 +773,9 @@ var app = new Vue({
             el.select();
             document.execCommand('copy');
         },
+        deck_column(column) {
+            return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
+        },
     },
     mounted() {
         let decktext = document.getElementById('decktext');
@@ -786,6 +786,17 @@ var app = new Vue({
         decktextarea.addEventListener('scroll', () => {
             console.log(decktextarea.scrollHeight, decktextarea.clientHeight);
             document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
+        });
+
+        Object.keys(tcg).forEach((_, index) => {
+            let div = document.getElementById('card' + index.toString())
+            let img_src = this.card_image(div.getAttribute('card'));
+            setTimeout(() => {
+                let img = document.createElement('img');
+                img.setAttribute('class', 'card-image');
+                img.src = img_src;
+                div.appendChild(img);
+            }, index);
         });
     },
     computed: {
