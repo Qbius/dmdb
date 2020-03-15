@@ -773,6 +773,9 @@ var app = new Vue({
             el.select();
             document.execCommand('copy');
         },
+        deck_column(column) {
+            return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
+        },
     },
     mounted() {
         let decktext = document.getElementById('decktext');
