@@ -42,9 +42,9 @@ html, body, #app {
 }
 
 #side {
-    flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 300px;
 }
 
 #queries {
@@ -341,7 +341,7 @@ input[class='corer custom-range']::-moz-range-track {
 #cards {
     user-select: none;
     border-radius: 25px;
-    flex: 5;
+    flex: 1;
     display: flex;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
