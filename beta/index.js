@@ -669,7 +669,7 @@ var app = new Vue({
         },
 
         // v-model variables
-        searchtypemodel: {data: {type: 'tcg'}},
+        searchtypemodel: 'tcg',
         models: {
             tags: new Model({rows: [[]]}, ({'name': cardname, 'effect': cardeffe, 'rarity': cardrari, 'race': cardrace}, model) => {
                 const tag_check_f = tag => (tag in special) ? special[tag](tag, cardname.toLowerCase()) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
@@ -698,6 +698,9 @@ var app = new Vue({
         },
         deck: {text: ""},
     },
+    watch: {
+        searchtypemodel: function(newType, oldType) { this.reset(); }
+    },
     methods: {
         reset() {
             Object.values(this.models).forEach(model => model.reset());
@@ -712,9 +715,6 @@ var app = new Vue({
                 this.deck.text = (this.deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (this.deck.text + '\n1x ' + tcg[card].name);
                 let decktext = document.getElementById("decktext");
                 decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
-            }
-            if (this.searchtypemodel.data.type === "deck") {
-                this.models.tags.reset();
             }
         },
         remove_card(card) {
@@ -753,7 +753,7 @@ var app = new Vue({
         init_from_deck(deckstr) {
             const res = deckstr.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
             this.deck.text = res;
-            this.searchtypemodel.data.type = 'deck';
+            this.searchtypemodel = 'deck';
             this.$forceUpdate();
         },
         copy_deck() {
@@ -823,7 +823,7 @@ var app = new Vue({
             return this.cards.filter(c => this.show[c] && c in this.deck_cards_to_count);
         },
         show_deck() {
-            return this.searchtypemodel.data.type === "deck" && this.models.tags.data.rows.every(row => row.length === 0);
+            return this.searchtypemodel === "deck";
         },
         show() {
             const modified_models = Object.values(this.models).filter(model => model.modified);
