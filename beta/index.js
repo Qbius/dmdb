@@ -734,7 +734,7 @@ var app = new Vue({
         },
         new_deck() {
             this.storage.decks.push({name: 'New deck', text: ''});
-            setTimeout(() => this.deck_index = this.storage.decks.length - 1, 1);
+            setTimeout(() => this.storage.deck_index = this.storage.decks.length - 1, 1);
         },
         tabclicked(index, decktitle) {
             if (index === this.storage.deck_index) {
