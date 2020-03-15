@@ -161,7 +161,9 @@
                 </div>
                 <div id="deckbuttons">
                     <b-button square v-on:click="deck.text = ''">CLEAR</b-button>
+                    <b-button square v-on:click="share_deck()">SHARE</b-button>
                 </div>
+                <textarea id="copier" style="display: none;"></textarea>
             </div>
 
         </div>

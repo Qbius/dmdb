@@ -558,6 +558,19 @@ Vue.component('totalbadge', {
     }
 });
 
+const codes = {
+    zero: '0'.charCodeAt(0),
+    A: 'A'.charCodeAt(0),
+    Z: 'Z'.charCodeAt(0),
+    a: 'a'.charCodeAt(0),
+    z: 'z'.charCodeAt(0),
+}
+
+const base62 = {
+    from: c => (c >= '0' && c <= '9') ? (c.charCodeAt(0) - codes.zero) : ((c >= 'A' && c <= 'Z') ? ((c.charCodeAt(0) - codes.A) + 10) : ((c >= 'a' && c <= 'z') ? ((c.charCodeAt(0) - codes.a) + 36) : 0)),
+    to: c => (c <= 9) ? c.toString() : ((c <= 35) ? String.fromCharCode(c - 35 + codes.Z) : ((c <= 61) ? String.fromCharCode(c - 61 + codes.z) : 0))
+}
+
 const Model = class {
     constructor(defvalue, testf) {
         this.default = {...defvalue};
@@ -751,6 +764,23 @@ var app = new Vue({
                 this.cards_shown = new_cards_shown;
                 this.$forceUpdate();
             }
+        },
+        init_from_deck(deckstr) {
+            const res = deckstr.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
+            this.deck.text = res;
+            this.searchtypemodel.data.deck = true;
+            this.searchtypemodel.data.tcg = false;
+            this.$forceUpdate();
+        },
+        share_deck() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            const deckcode = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
+            const url = window.location.href.split('?')[0] + '?shared=' + deckcode;
+            let el = document.getElementById('copier');
+            console.log(url)
+            el.value = url;
+            el.select();
+            document.execCommand('copy');
         }
     },
     computed: {
@@ -773,4 +803,4 @@ document.getElementById('cards').addEventListener('scroll', app.update_visible_c
 app.update_visible_cards_count();
 
 var urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('noo')) console.log(urlParams.get('noo'));
+if (urlParams.has('shared')) app.init_from_deck(urlParams.get('shared'));
