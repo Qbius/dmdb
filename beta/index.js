@@ -827,7 +827,7 @@ var app = new Vue({
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             const deckcode = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).filter(([count, name]) => count > 0).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
-            const url = window.location.href.split('?')[0] + '?shared=' + deckcode;
+            const url = window.location.href.split('?')[0] + '?shared=' + deckcode + ((this.active_deck.name !== 'New deck') ? '@' + encodeURI(this.active_deck.name) : '');
             let el = document.getElementById('copier');
             el.value = url;
             el.select();
