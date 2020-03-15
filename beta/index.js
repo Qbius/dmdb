@@ -784,6 +784,17 @@ var app = new Vue({
             console.log(decktextarea.scrollHeight, decktextarea.clientHeight);
             document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
         });
+
+        Object.keys(tcg).forEach((_, index) => {
+            let div = document.getElementById('card' + index.toString())
+            let img_src = this.card_image(div.getAttribute('card'));
+            setTimeout(() => {
+                let img = document.createElement('img');
+                img.class = 'card-image';
+                img.src = img_src;
+                div.appendChild(img);
+            }, index);
+        });
     },
     computed: {
         cards_per_row() {
