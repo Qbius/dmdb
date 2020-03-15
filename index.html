@@ -148,7 +148,7 @@
                     </div>
                 </div>
                 <div id="decktextcontainer">
-                    <textarea id="decktext" :style="'width: ' + el_property('decktextcontainer', 'width') + ';'" v-model="deck.text" rows="20"></textarea>
+                    <textarea id="decktext" :style="decktext_style" v-model="deck.text"></textarea>
                     <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
                         <div v-for="card in deck_lines" class="deckoverlay">
                             <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" src="icons/shieldtrigger.png"></div>

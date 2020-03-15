@@ -152,6 +152,13 @@ html, body, #app {
     display: flex;
     flex-direction: column;
     pointer-events: none;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+#deckoverlay-container::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .deckoverlay {
@@ -177,6 +184,13 @@ html, body, #app {
     flex: 1;
     position: absolute;
     width: inherit;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+#decktext::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .query {

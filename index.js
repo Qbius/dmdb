@@ -770,6 +770,16 @@ var app = new Vue({
             document.execCommand('copy');
         },
     },
+    mounted() {
+        let decktext = document.getElementById('decktext');
+        decktext.style.width = this.el_property('decktextcontainer', 'width');
+        decktext.style.height = (Math.round(this.el_property('decktextcontainer', 'height').split(/[^\d]/)[0]) - 20).toString() + 'px';
+
+        $("#decktext").scroll(() => { 
+            $("#deckoverlay-container").scrollTop($("#decktext").scrollTop());
+            $("#deckoverlay-container").scrollLeft($("#decktext").scrollLeft());
+        });
+    },
     computed: {
         cards_per_row() {
             return Math.floor(Math.round(this.el_property('cards', 'width').split(/[^\d]/)[0]) / 226);
@@ -778,6 +788,9 @@ var app = new Vue({
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             const res = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
             return res;
+        },
+        decktext_style() {
+            return 'width: ' + this.el_property('decktextcontainer', 'width') + '; height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
             return this.deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
