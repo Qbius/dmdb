@@ -705,6 +705,8 @@ var app = new Vue({
             }
             else {
                 this.deck.text = (this.deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (this.deck.text + '\n1x ' + tcg[card].name);
+                let decktext = document.getElementById("decktext");
+                decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
             }
         },
         remove_card(card) {
@@ -777,8 +779,8 @@ var app = new Vue({
 
         let decktextarea = document.getElementById('decktext');
         decktextarea.addEventListener('scroll', () => {
-            console.log("he");
-            document.getElementById("deckoverlay-container-wrapper").scrollTop = decktextarea.scrollTop;
+            console.log(decktextarea.scrollHeight, decktextarea.clientHeight);
+            document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
         });
     },
     computed: {
