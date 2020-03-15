@@ -775,6 +775,11 @@ var app = new Vue({
         copy_deck() {
             document.getElementById('decktext').select();
             document.execCommand('copy');
+            if (document.selection)
+                document.selection.empty();
+            else if (window.getSelection)
+                window.getSelection().removeAllRanges();
+            document.getElementById('copybutton').focus();
         },
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
