@@ -172,13 +172,13 @@
         </div>
 
         <div id="cards">
-            <div id="cards-queried" v-show="searchtypemodel.data.tcg">
-                <img v-for="card in cards" class="card-image" v-show="show[card]" :alt="card" :src="card_image(card)" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
-            </div>
             <div id="cards-deck" v-show="searchtypemodel.data.deck">
                 <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                     <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
                 </div>
+            </div>
+            <div id="cards-queried" v-show="searchtypemodel.data.tcg">
+                <img v-for="card in cards" class="card-image" v-show="show[card]" :alt="card" :src="card_image(card)" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
             </div>
         </div>
     </div>
