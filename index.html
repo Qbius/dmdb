@@ -92,7 +92,7 @@
             <div id="queries">
 
                 <div id="searchtype">
-                    <picker :modelvar="searchtypemodel" :opts="searchtypes"></picker>
+                        <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'TCG', value: 'tcg'}, {text: 'DECK', value: 'deck'}]" buttons size="sm"></b-form-radio-group>
                 </div>
                 
                 <div id="taggroup" class="query">
@@ -172,11 +172,11 @@
         </div>
 
         <div id="cards">
-            <div id="cards-queried" v-show="searchtypemodel.data.tcg">
+            <div id="cards-queried" v-show="!show_deck">
                 <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                 </div>
             </div>
-            <div id="cards-deck" v-show="searchtypemodel.data.deck">
+            <div id="cards-deck" v-show="show_deck">
                 <!--<div v-for="column in [...Array(cards_per_row).keys()]" class="deck-vertical-container">-->
                     <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                         <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
