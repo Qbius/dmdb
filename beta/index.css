@@ -244,6 +244,10 @@ html, body, #app {
     display: none!important;
 }
 
+.card-header {
+    padding-top: 0px!important;
+}
+
 .anyall-buttons {
     display: flex;
     justify-content: center;
@@ -338,6 +342,10 @@ input[class='corer custom-range']::-moz-range-track {
     background-image: linear-gradient(to right, white var(--lowerbound), var(--controlcolor) var(--lowerbound) var(--upperbound), white var(--upperbound) 100%);   
 }
 
+#decks-tabs {
+    flex: 1;
+}
+
 #cards {
     user-select: none;
     border-radius: 25px;
@@ -348,6 +356,29 @@ input[class='corer custom-range']::-moz-range-track {
     overflow-y: scroll;
     scrollbar-width: none;
 }
+
+body, .tab-title, .tab-input {
+  font: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.tab-title-container {
+    position: relative;
+}
+
+.tab-title {
+  position: absolute;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.tab-input {
+  border: none;
+  color: #888;
+  min-width: 10px;
+}
+
 
 #cards-queried {
     display: flex;
