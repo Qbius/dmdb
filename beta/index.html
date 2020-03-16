@@ -181,7 +181,7 @@
                 <b-tabs v-model="storage.deck_index" card>
                     <b-tab v-for="(deck, index) in storage.decks" @click="tabclicked(index, deck.name)" :ref="'tab' + index.toString()">
                         <template v-slot:title>
-                            <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" lass="tab-title-container" @keyup.enter="if (!tabedits[index]) {$event.preventDefault(); }">
+                            <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" lass="tab-title-container">
                                 <span :id="'tab' + index.toString() + 'title'" class="tab-title">{{deck.name}}</span>
                                 <input v-show="tabedits[index]" :style="'width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" class="tab-input" type="text" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
                             </div>
