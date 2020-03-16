@@ -734,17 +734,29 @@ var app = new Vue({
         },
         new_deck() {
             this.storage.decks.push({name: 'New deck', text: ''});
-            setTimeout(() => this.storage.deck_index = this.storage.decks.length - 1, 1);
+            this.$forceUpdate();
+            setTimeout(() => this.storage.deck_index = this.storage.decks.length - 1, 100);
         },
         tabclicked(index, decktitle) {
             if (index === this.storage.deck_index) {
-                this.tabedits[index] = true;
+                this.tabedits[index] = decktitle;
                 this.$forceUpdate();
                 setTimeout(() => document.getElementById('tab' + index.toString() + 'input').focus());
             }
         },
         tabunclicked(index) {
-            delete this.tabedits[index];
+            if (this.tabedits[index]) {
+                let old = this.tabedits[index];
+                delete this.tabedits[index]; 
+                this.$forceUpdate();
+                setTimeout(() => {
+                    if (this.storage.decks[index].name.trim().length === 0) {
+                        document.getElementById('tab' + index.toString() + 'title').textContent = old;
+                        this.storage.decks[index].name = old;
+                        this.$forceUpdate();
+                    }
+                });
+            }
         },
         gettitlewidth(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');
@@ -752,7 +764,8 @@ var app = new Vue({
         },
         gettitleheight(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');
-            return title ? (title.offsetHeight + "px") : '5px';
+            console.log((title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '22px')
+            return (title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '24px';
         },
         tabtitlechanged(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');

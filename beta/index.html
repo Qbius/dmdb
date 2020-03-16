@@ -183,7 +183,7 @@
                         <template v-slot:title>
                             <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" lass="tab-title-container" @keyup.enter="if (!tabedits[index]) {$event.preventDefault(); }">
                                 <span :id="'tab' + index.toString() + 'title'" class="tab-title">{{deck.name}}</span>
-                                <input v-show="tabedits[index]" :style="'width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" class="tab-input" type="text" @input="tabtitlechanged(index)" @keyup.enter="if (tabedits[index]) { delete tabedits[index]; $event.preventDefault(); $forceUpdate(); }" v-on:blur="delete tabedits[index]" v-model="deck.name">
+                                <input v-show="tabedits[index]" :style="'width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" class="tab-input" type="text" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
                             </div>
                         </template>
                         <div id="cards-deck">
