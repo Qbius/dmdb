@@ -178,33 +178,36 @@
                 </div>
             </div>
             <div id="decks-tabs" v-show="show_deck">
-                <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">
-                <b-tabs v-model="storage.deck_index" no-fade lazy card nav-class="tab-title-backs">
-                    <template v-slot:tabs-start>
-                        <b-dropdown id="dropdown-1" size="sm">
-                            <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download local storage</b-dropdown-item>
-                            <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load local storage from file</b-dropdown-item>
-                            <b-dropdown-item @click="localStorage.clear()">Clear local storage</b-dropdown-item>
-                        </b-dropdown>
-                    </template>
-                    <b-tab v-for="(deck, index) in storage.decks" @click="tabclicked(index)" :ref="'tab' + index.toString()">
-                        <template v-slot:title>
-                            <div class="tab-title-container-wrapper">
-                                <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" @click="tabtitleclicked(index, deck.name)" class="tab-title-container">
-                                    <font color="#000000"><strong><p :id="'tab' + index.toString() + 'title'" class="tab-title">{{ index < (storage.decks.length - 1) ? deck.name : '+' }}</p></strong></font>
-                                    <input v-show="tabedits[index]" :style="'font-weight: bold; width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" maxlength="32" class="tab-input" type="text" @keydown="$event.stopPropagation()" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
-                                </div>
-                                <span v-if="storage.decks.length > 2 && (index < storage.decks.length - 1)" @click="closetab(index, $event)">&#x2716;</span>
-                            </div>
-                        </template>
-                        <div id="cards-deck">
-                            <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
-                                <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
-                            </div>
+                <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">          
+                <div id="cards-deck">
+                    <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+                        <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="show_deck" id="decklist">
+            <div id="deckname-editor" style="margin-top: 10px; display: flex;">
+                <input id="deckname" style="flex: 1;" v-model="active_deck.name"></input>
+                <b-dropdown right size="sm">
+                    <b-dropdown-item :disabled.sync="storage.decks.length === 1" @click="delete_active_deck()">Delete deck</b-dropdown-item>
+                    <b-dropdown-divider></b-dropdown-divider>
+                    <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download local storage</b-dropdown-item>
+                    <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load local storage from file</b-dropdown-item>
+                    <b-dropdown-item @click="localStorage.clear()">Clear local storage</b-dropdown-item>
+                </b-dropdown>
+            </div>
+            <div id="decklist-radio">
+                <b-tabs no-fade justified lazy card nav-class="tab-title-backs">
+                    <b-tab title="DECKS">
+                        <div style="display: flex; flex-direction: column;">
+                            <b-form-radio-group id="btn-radios-3" v-model="storage.deck_index" :options="deck_list_options" buttons button-variant="outline-secondary" button-squared stacked></b-form-radio-group>
                         </div>
                     </b-tab>
+                    <b-tab disabled title="STATS"></b-tab>
                 </b-tabs>
             </div>
+            <b-button style="margin: 2px; margin-bottom: 5px;" @click="new_deck()">CREATE NEW DECK</b-button>
         </div>
         <b-alert v-model="file_error" class="position-fixed fixed-bottom m-0 rounded-0" style="z-index: 2000;" variant="danger" dismissible>
             Invalid json file!

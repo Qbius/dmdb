@@ -771,67 +771,17 @@ var app = new Vue({
             });
         },
         new_deck() {
-            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
-            this.storage.decks[this.storage.decks.length - 1].text = "";
-            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "New deck";
             this.storage.decks.push({name: 'New deck', text: ''});
+            this.storage.deck_index = this.storage.decks.length - 1;
         },
-        tabclicked(index) {
-            if (index === (this.storage.decks.length - 1)) {
-                this.new_deck();
+        delete_active_deck() {
+            if (this.storage.decks.length === 1) return;
+            
+            let deleted_index = this.storage.deck_index;
+            if (deleted_index === (this.storage.decks.length - 1)) {
+                this.storage.deck_index -= 1;
             }
-        },
-        tabtitleclicked(index, decktitle) {
-            if (index === this.storage.deck_index) {
-                this.tabedits[index] = decktitle;
-                this.$forceUpdate();
-                setTimeout(() => {
-                    let input = document.getElementById('tab' + index.toString() + 'input');
-                    input.focus();
-                    input.setSelectionRange(input.value.length, input.value.length);
-                });
-            }
-        },
-        tabunclicked(index) {
-            if (this.tabedits[index]) {
-                let old = this.tabedits[index];
-                delete this.tabedits[index]; 
-                this.$forceUpdate();
-                setTimeout(() => {
-                    if (this.storage.decks[index].name.trim().length === 0) {
-                        document.getElementById('tab' + index.toString() + 'title').textContent = old;
-                        this.storage.decks[index].name = old;
-                        this.$forceUpdate();
-                    }
-                });
-            }
-        },
-        gettitlewidth(index) {
-            let title = document.getElementById('tab' + index.toString() + 'title');
-            return title ? ((title.offsetWidth + 3 + 5 * (title.textContent.split(' ').filter(token => token.length === 0).length)) + "px") : '5px';
-        },
-        gettitleheight(index) {
-            let title = document.getElementById('tab' + index.toString() + 'title');
-            return (title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '24px';
-        },
-        tabtitlechanged(index) {
-            let title = document.getElementById('tab' + index.toString() + 'title');
-            let input = document.getElementById('tab' + index.toString() + 'input');
-
-            title.textContent = input.value;
-            input.style.width = (title.offsetWidth + 5 * (input.value.split(' ').filter(token => token.length === 0).length)) + "px";
-        },
-        closetab(index, e) {
-            e.stopPropagation();
-            e.preventDefault();
-            this.storage.decks.splice(index, 1);
-            if (this.storage.deck_index >= index && this.storage.deck_index > 0) {
-                this.storage.deck_index -= 1
-            }
-            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
-            this.storage.decks[this.storage.decks.length - 1].text = "";
-            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "+";
-            this.$forceUpdate();
+            this.storage.decks.splice(deleted_index, 1);
         },
         add_card(card) {
             if (this.active_deck.text.toLowerCase().includes(card)) {
@@ -973,6 +923,9 @@ var app = new Vue({
         show() {
             const modified_models = Object.values(this.models).filter(model => model.modified);
             return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: modified_models.every(model => model.test(tcg[card]))}), {});
+        },
+        deck_list_options() {
+            return this.storage.decks.map(({name: deckname}, index) => ({text: deckname ? deckname : 'Deck ' + (index + 1).toString(), value: index}));
         }
     }
 });

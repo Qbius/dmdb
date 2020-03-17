@@ -235,6 +235,14 @@ html, body, #app {
     padding-bottom: 0px!important;
 }
 
+.btn-outline-secondary {
+    border-radius: 0px!important;
+}
+
+.dropdown-toggle {
+    border-radius: 0px!important;
+}
+
 .close {
     display: none!important;
 }
@@ -249,7 +257,7 @@ html, body, #app {
 }
 
 .tab-pane {
-    padding: 5px!important;
+    padding: 0px!important;
 }
 
 .tab-title-backs {
@@ -363,6 +371,31 @@ input[class='corer custom-range']::-moz-range-track {
     opacity: var(--contentopacity);
     overflow-y: scroll;
     scrollbar-width: none;
+    margin-right: 1px;
+}
+
+#decklist {
+    margin-left: 1px;
+    width: 220px;
+    height: 100vh;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--contentcolor);
+    opacity: var(--contentopacity);
+}
+
+#decklist-radio {
+    flex: 1;
+    overflow-y: scroll;
+    border: 1px solid;
+    border-color: var(--controlcolor);
+    scrollbar-width: none;
+}
+
+#decklist-radio::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 body, .tab-title, .tab-input {
