@@ -92,7 +92,7 @@
             <div id="queries">
 
                 <div id="searchtype">
-                        <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'TCG', value: 'tcg'}, {text: 'DECK', value: 'deck'}]" buttons size="sm"></b-form-radio-group>
+                        <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'CARDS', value: 'tcg'}, {text: 'DECKS', value: 'deck'}]" buttons size="sm"></b-form-radio-group>
                 </div>
                 
                 <div id="taggroup" class="query">
@@ -149,8 +149,8 @@
                     </div>
                 </div>
                 <div id="decktextcontainer">
-                    <textarea id="decktext" spellcheck="false" :style="decktext_style" v-model="deck.text"></textarea>
-                    <div id="deckoverlay-container-wrapper">
+                    <textarea id="decktext" spellcheck="false" :style="decktext_style" v-model="active_deck.text"></textarea>
+                    <div id="deckoverlay-container-wrapper" :style="decktext_style">
                         <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
                             <div v-for="card in deck_lines" class="deckoverlay">
                                 <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="shieldtrigger_icon"></div>
@@ -163,7 +163,7 @@
                     </div>
                 </div>
                 <div id="deckbuttons">
-                    <b-button square v-on:click="deck.text = ''">CLEAR</b-button>
+                    <b-button square v-on:click="active_deck.text = ''">CLEAR</b-button>
                     <b-button square v-on:click="copy_deck()" id="copybutton">COPY</b-button>
                     <b-button square v-on:click="share_deck()">SHARE</b-button>
                 </div>
@@ -177,14 +177,46 @@
                 <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                 </div>
             </div>
-            <div id="cards-deck" v-show="show_deck">
-                <!--<div v-for="column in [...Array(cards_per_row).keys()]" class="deck-vertical-container">-->
-                    <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
-                        <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
-                    </div>
-                <!--</div>-->
+            <div id="decks-tabs" v-show="show_deck">
+                <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">
+                <b-tabs v-model="storage.deck_index" no-fade lazy card nav-class="tab-title-backs">
+                    <template v-slot:tabs-start>
+                        <b-dropdown id="dropdown-1" size="sm">
+                            <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download local storage</b-dropdown-item>
+                            <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load local storage from file</b-dropdown-item>
+                            <b-dropdown-item @click="localStorage.clear()">Clear local storage</b-dropdown-item>
+                        </b-dropdown>
+                    </template>
+                    <b-tab v-for="(deck, index) in storage.decks" @click="tabclicked(index)" :ref="'tab' + index.toString()">
+                        <template v-slot:title>
+                            <div class="tab-title-container-wrapper">
+                                <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" @click="tabtitleclicked(index, deck.name)" class="tab-title-container">
+                                    <font color="#000000"><strong><p :id="'tab' + index.toString() + 'title'" class="tab-title">{{ index < (storage.decks.length - 1) ? deck.name : '+' }}</p></strong></font>
+                                    <input v-show="tabedits[index]" :style="'font-weight: bold; width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" maxlength="32" class="tab-input" type="text" @keydown="$event.stopPropagation()" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
+                                </div>
+                                <span v-if="storage.decks.length > 2 && (index < storage.decks.length - 1)" @click="closetab(index, $event)">&#x2716;</span>
+                            </div>
+                        </template>
+                        <div id="cards-deck">
+                            <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+                                <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
+                            </div>
+                        </div>
+                    </b-tab>
+                </b-tabs>
             </div>
         </div>
+        <b-alert v-model="file_error" class="position-fixed fixed-bottom m-0 rounded-0" style="z-index: 2000;" variant="danger" dismissible>
+            Invalid json file!
+        </b-alert>
+        <b-alert v-model="copied" class="position-fixed fixed-bottom m-0 rounded-0" style="z-index: 2000;" variant="success" dismissible>
+            Copied to clipboard!
+        </b-alert>
+        <b-alert v-if="rodo_show" v-model="rodo_show" class="position-fixed fixed-bottom m-0 rounded-0" style="display: flex; z-index: 2000;" variant="light" dismissible>
+            I'm using HTML5 Local Storage to save your decks between sessions and whatnot. It's like cookies, but even less than that.
+            <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false; localStorage.agree = true;">Accept</b-button>
+            <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false;">Dismiss</b-button>
+        </b-alert>
     </div>
 </div>
 

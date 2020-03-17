@@ -653,6 +653,11 @@ var app = new Vue({
         addcard: "",
         getcards: () => {},
         always: "",
+        rodo_show: !localStorage.agree,
+        file_error: false,
+        copied: false,
+        storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: 'New deck', text: ''}, {name: 'New deck', text: ''}]},
+        tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
         blocker_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/blocker.png',
         evolutioncreature_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/evolutioncreature.png',
@@ -726,27 +731,129 @@ var app = new Vue({
         reset() {
             Object.values(this.models).forEach(model => model.reset());
         },
+        download_local_storage() {
+            let file = new Blob([JSON.stringify({decks: this.storage.decks})], {type: 'text/plain'});
+            let a = document.createElement("a");
+            let url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = 'dmdbLocalStorage.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);  
+            });
+        },
+        load_storage() {
+            let file_input = document.getElementById('invisiblefileinput');
+            if (!file_input.files) return;
+
+            const show_error = () => {
+                this.file_error = true;
+                setTimeout(() => this.file_error = false, 2020);
+            };
+
+            file_input.files[0].text().then(text => {
+                try {
+                    const parsed = JSON.parse(text);
+                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.length >= 2 && parsed.decks.every(deck => !console.log(deck) && (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
+                        this.storage.deck_index = 0;
+                        this.storage.decks = parsed.decks;
+                    }
+                    else {
+                        show_error();
+                    }
+                }
+                catch (error) {
+                    console.log("ok!");
+                    show_error();
+                }
+            });
+        },
+        new_deck() {
+            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
+            this.storage.decks[this.storage.decks.length - 1].text = "";
+            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "New deck";
+            this.storage.decks.push({name: 'New deck', text: ''});
+        },
+        tabclicked(index) {
+            if (index === (this.storage.decks.length - 1)) {
+                this.new_deck();
+            }
+        },
+        tabtitleclicked(index, decktitle) {
+            if (index === this.storage.deck_index) {
+                this.tabedits[index] = decktitle;
+                this.$forceUpdate();
+                setTimeout(() => {
+                    let input = document.getElementById('tab' + index.toString() + 'input');
+                    input.focus();
+                    input.setSelectionRange(input.value.length, input.value.length);
+                });
+            }
+        },
+        tabunclicked(index) {
+            if (this.tabedits[index]) {
+                let old = this.tabedits[index];
+                delete this.tabedits[index]; 
+                this.$forceUpdate();
+                setTimeout(() => {
+                    if (this.storage.decks[index].name.trim().length === 0) {
+                        document.getElementById('tab' + index.toString() + 'title').textContent = old;
+                        this.storage.decks[index].name = old;
+                        this.$forceUpdate();
+                    }
+                });
+            }
+        },
+        gettitlewidth(index) {
+            let title = document.getElementById('tab' + index.toString() + 'title');
+            return title ? ((title.offsetWidth + 3 + 5 * (title.textContent.split(' ').filter(token => token.length === 0).length)) + "px") : '5px';
+        },
+        gettitleheight(index) {
+            let title = document.getElementById('tab' + index.toString() + 'title');
+            return (title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '24px';
+        },
+        tabtitlechanged(index) {
+            let title = document.getElementById('tab' + index.toString() + 'title');
+            let input = document.getElementById('tab' + index.toString() + 'input');
+
+            title.textContent = input.value;
+            input.style.width = (title.offsetWidth + 5 * (input.value.split(' ').filter(token => token.length === 0).length)) + "px";
+        },
+        closetab(index, e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.storage.decks.splice(index, 1);
+            if (this.storage.deck_index >= index && this.storage.deck_index > 0) {
+                this.storage.deck_index -= 1
+            }
+            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
+            this.storage.decks[this.storage.decks.length - 1].text = "";
+            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "+";
+            this.$forceUpdate();
+        },
         add_card(card) {
-            if (this.deck.text.toLowerCase().includes(card)) {
-                const card_line = this.deck.text.split('\n').find(line => line.toLowerCase().includes(card));
+            if (this.active_deck.text.toLowerCase().includes(card)) {
+                const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
-                this.deck.text = Math.round(countstr) >= 4? this.deck.text : this.deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
+                this.active_deck.text = Math.round(countstr) >= 4? this.active_deck.text : this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
             }
             else {
-                this.deck.text = (this.deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (this.deck.text + '\n1x ' + tcg[card].name);
+                this.active_deck.text = (this.active_deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (this.active_deck.text + '\n1x ' + tcg[card].name);
                 let decktext = document.getElementById("decktext");
                 decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
             }
         },
         remove_card(card) {
-            if (this.deck.text.toLowerCase().includes(card)) {
-                const card_line = this.deck.text.split('\n').find(line => line.toLowerCase().includes(card));
+            if (this.active_deck.text.toLowerCase().includes(card)) {
+                const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
                 if (Math.round(countstr) > 1) {
-                    this.deck.text = this.deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) - 1).toString()));
+                    this.active_deck.text = this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) - 1).toString()));
                 }
                 else {
-                    this.deck.text = this.deck.text.split('\n').filter(line => line !== card_line).join('\n');
+                    this.active_deck.text = this.active_deck.text.split('\n').filter(line => line !== card_line).join('\n');
                 }
             }
         },
@@ -772,10 +879,19 @@ var app = new Vue({
             return el.currentStyle ? x.currentStyle[prop] : document.defaultView.getComputedStyle(el, null).getPropertyValue(prop);
         },
         init_from_deck(deckstr) {
-            const res = deckstr.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
-            this.deck.text = res;
-            this.searchtypemodel = 'deck';
-            this.$forceUpdate();
+            const[deckcode, decktitle] = deckstr.split('@')
+            const res = deckcode.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
+            this.storage.decks[this.storage.decks.length - 1].name = decktitle ? decktitle : "New deck";
+            this.storage.decks[this.storage.decks.length - 1].text = res;
+            this.storage.decks.push({name: 'New deck', text: ''});
+            setTimeout(() => {
+                this.storage.deck_index = this.storage.decks.length - 2;
+                this.searchtypemodel = 'deck';
+            });
+        },
+        show_copied() {
+            this.copied = true;
+            setTimeout(() => this.copied = false, 2020);
         },
         copy_deck() {
             document.getElementById('decktext').select();
@@ -788,10 +904,9 @@ var app = new Vue({
         },
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
-            const deckcode = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).filter(([count, name]) => count > 0).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
-            const url = window.location.href.split('?')[0] + '?shared=' + deckcode;
+            const deckcode = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).filter(([count, name]) => count > 0).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
+            const url = window.location.href.split('?')[0] + '?shared=' + deckcode + ((this.active_deck.name !== 'New deck') ? '@' + encodeURI(this.active_deck.name) : '');
             let el = document.getElementById('copier');
-            console.log(url)
             el.value = url;
             el.select();
             document.execCommand('copy');
@@ -807,7 +922,6 @@ var app = new Vue({
 
         let decktextarea = document.getElementById('decktext');
         decktextarea.addEventListener('scroll', () => {
-            console.log(decktextarea.scrollHeight, decktextarea.clientHeight);
             document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
         });
 
@@ -823,7 +937,7 @@ var app = new Vue({
         });
 
         for (let el of document.getElementsByClassName('deckoverlay')) {
-            el.addEventListener('mouseover', () => !console.log("hehe") && (el.style.background_color = "red"));
+            el.addEventListener('mouseover', () => el.style.background_color = "red");
         }
     },
     computed: {
@@ -832,23 +946,29 @@ var app = new Vue({
         },
         deck_cards_to_count() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
-            const res = this.deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
+            const res = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
             return res;
         },
         decktext_style() {
             return 'width: ' + this.el_property('decktextcontainer', 'width') + '; height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
-            return this.deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
+            return this.active_deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
         },
         cards() {
             return Object.keys(tcg).sort(this.sorting.function[this.sorting.type]);
         },
         deck_cards() {
+            if (localStorage.agree) {
+                localStorage.dmdb = JSON.stringify(this.storage);
+            }
             return this.cards.filter(c => this.show[c] && c in this.deck_cards_to_count);
         },
         show_deck() {
             return this.searchtypemodel === "deck";
+        },
+        active_deck() {
+            return this.storage.decks[this.storage.deck_index];
         },
         show() {
             const modified_models = Object.values(this.models).filter(model => model.modified);
@@ -858,4 +978,14 @@ var app = new Vue({
 });
 
 var urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('shared')) app.init_from_deck(urlParams.get('shared'));
+if (urlParams.has('shared')) {
+    app.init_from_deck(urlParams.get('shared'));
+}
+else {
+    setTimeout(() => {
+        app.storage.decks[app.storage.decks.length - 1].name = " ";
+        app.storage.decks[app.storage.decks.length - 1].text = " ";
+        app.storage.decks[app.storage.decks.length - 1].name = "New deck";
+        app.storage.decks[app.storage.decks.length - 1].text = "";
+    });
+}
