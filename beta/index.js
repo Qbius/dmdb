@@ -656,6 +656,7 @@ var app = new Vue({
         rodo_show: !localStorage.agree,
         file_error: false,
         copied: false,
+        decks_filter: "",
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: 'New deck', text: ''}, {name: 'New deck', text: ''}]},
         tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
@@ -925,7 +926,7 @@ var app = new Vue({
             return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: modified_models.every(model => model.test(tcg[card]))}), {});
         },
         deck_list_options() {
-            return this.storage.decks.map(({name: deckname}, index) => ({text: deckname ? deckname : 'Deck ' + (index + 1).toString(), value: index}));
+            return this.storage.decks.map(({name: deckname}, index) => ({text: deckname ? deckname : 'Deck ' + (index + 1).toString(), value: index})).filter(({text: deckname}) => !this.decks_filter || deckname.toLowerCase().includes(this.decks_filter.toLowerCase()));
         }
     }
 });

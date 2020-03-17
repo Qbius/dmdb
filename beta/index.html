@@ -187,27 +187,35 @@
             </div>
         </div>
         <div v-if="show_deck" id="decklist">
-            <div id="deckname-editor" style="margin-top: 10px; display: flex;">
-                <input id="deckname" style="flex: 1;" v-model="active_deck.name"></input>
+            <div id="deckname-editor" style="display: flex;">
                 <b-dropdown right size="sm">
                     <b-dropdown-item :disabled.sync="storage.decks.length === 1" @click="delete_active_deck()">Delete deck</b-dropdown-item>
                     <b-dropdown-divider></b-dropdown-divider>
-                    <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download local storage</b-dropdown-item>
-                    <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load local storage from file</b-dropdown-item>
+                    <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download decks to file</b-dropdown-item>
+                    <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load decks from file</b-dropdown-item>
                     <b-dropdown-item @click="localStorage.clear()">Clear local storage</b-dropdown-item>
                 </b-dropdown>
+                <b-form-input squared id="deckname" v-model="active_deck.name"></input>
             </div>
             <div id="decklist-radio">
-                <b-tabs no-fade justified lazy card nav-class="tab-title-backs">
-                    <b-tab title="DECKS">
+                <b-tabs no-fade fill lazy card nav-class="tab-title-backs">
+                    <b-tab>
+                        <template v-slot:title>
+                            <strong><font color="#6c757d">DECKS</font></strong>
+                        </template>
                         <div style="display: flex; flex-direction: column;">
                             <b-form-radio-group id="btn-radios-3" v-model="storage.deck_index" :options="deck_list_options" buttons button-variant="outline-secondary" button-squared stacked></b-form-radio-group>
                         </div>
                     </b-tab>
-                    <b-tab disabled title="STATS"></b-tab>
+                    <b-tab>
+                        <template v-slot:title>
+                            <strong><font color="#6c757d">STATS</font></strong>
+                        </template>
+                    </b-tab>
                 </b-tabs>
             </div>
-            <b-button style="margin: 2px; margin-bottom: 5px;" @click="new_deck()">CREATE NEW DECK</b-button>
+            <b-form-input squared v-model="decks_filter" placeholder="Filter decks..."></b-form-input>
+            <b-button squared style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;" @click="new_deck()">CREATE NEW DECK</b-button>
         </div>
         <b-alert v-model="file_error" class="position-fixed fixed-bottom m-0 rounded-0" style="z-index: 2000;" variant="danger" dismissible>
             Invalid json file!
