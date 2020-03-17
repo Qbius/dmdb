@@ -150,7 +150,7 @@
                 </div>
                 <div id="decktextcontainer">
                     <textarea id="decktext" spellcheck="false" :style="decktext_style" v-model="active_deck.text"></textarea>
-                    <div id="deckoverlay-container-wrapper">
+                    <div id="deckoverlay-container-wrapper" :style="decktext_style">
                         <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
                             <div v-for="card in deck_lines" class="deckoverlay">
                                 <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="shieldtrigger_icon"></div>

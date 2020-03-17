@@ -771,6 +771,9 @@ var app = new Vue({
             });
         },
         new_deck() {
+            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
+            this.storage.decks[this.storage.decks.length - 1].text = "";
+            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "New deck";
             this.storage.decks.push({name: 'New deck', text: ''});
         },
         tabclicked(index) {
@@ -825,6 +828,10 @@ var app = new Vue({
             if (this.storage.deck_index >= index && this.storage.deck_index > 0) {
                 this.storage.deck_index -= 1
             }
+            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
+            this.storage.decks[this.storage.decks.length - 1].text = "";
+            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "+";
+            this.$forceUpdate();
         },
         add_card(card) {
             if (this.active_deck.text.toLowerCase().includes(card)) {
@@ -971,4 +978,14 @@ var app = new Vue({
 });
 
 var urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('shared')) app.init_from_deck(urlParams.get('shared'));
+if (urlParams.has('shared')) {
+    app.init_from_deck(urlParams.get('shared'));
+}
+else {
+    setTimeout(() => {
+        app.storage.decks[app.storage.decks.length - 1].name = " ";
+        app.storage.decks[app.storage.decks.length - 1].text = " ";
+        app.storage.decks[app.storage.decks.length - 1].name = "New deck";
+        app.storage.decks[app.storage.decks.length - 1].text = "";
+    });
+}
