@@ -832,7 +832,7 @@ var app = new Vue({
         init_from_deck(deckstr) {
             const[deckcode, decktitle] = deckstr.split('@')
             const res = deckcode.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
-            this.storage.decks.push({name: '', text: ''});
+            this.storage.decks.push({name: decktitle ? decktitle : '', text: res});
             setTimeout(() => {
                 this.storage.deck_index = this.storage.decks.length - 1;
                 this.searchtypemodel = 'deck';
