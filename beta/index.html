@@ -192,9 +192,9 @@
                             <div class="tab-title-container-wrapper">
                                 <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" @click="tabtitleclicked(index, deck.name)" class="tab-title-container">
                                     <font color="#000000"><strong><p :id="'tab' + index.toString() + 'title'" class="tab-title">{{ index < (storage.decks.length - 1) ? deck.name : '+' }}</p></strong></font>
-                                    <input v-show="tabedits[index]" :style="'font-weight: bold; width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" class="tab-input" type="text" @keydown="$event.stopPropagation()" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
+                                    <input v-show="tabedits[index]" :style="'font-weight: bold; width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" maxlength="32" class="tab-input" type="text" @keydown="$event.stopPropagation()" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
                                 </div>
-                                <span v-if="index > 0 && index < (storage.decks.length - 1)" @click="closetab(index, $event)">&#x2716;</span>
+                                <span v-if="storage.decks.length > 2 && (index < storage.decks.length - 1)" @click="closetab(index, $event)">&#x2716;</span>
                             </div>
                         </template>
                         <div id="cards-deck">

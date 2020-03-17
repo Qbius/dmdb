@@ -755,7 +755,7 @@ var app = new Vue({
             file_input.files[0].text().then(text => {
                 try {
                     const parsed = JSON.parse(text);
-                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.every(deck => !console.log(deck) && (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
+                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.length >= 2 && parsed.decks.every(deck => !console.log(deck) && (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
                         this.storage.deck_index = 0;
                         this.storage.decks = parsed.decks;
                     }
@@ -813,7 +813,7 @@ var app = new Vue({
         tabtitlechanged(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');
             let input = document.getElementById('tab' + index.toString() + 'input');
-            console.log('"' + input.value + '"');
+
             title.textContent = input.value;
             input.style.width = (title.offsetWidth + 5 * (input.value.split(' ').filter(token => token.length === 0).length)) + "px";
         },
@@ -821,7 +821,7 @@ var app = new Vue({
             e.stopPropagation();
             e.preventDefault();
             this.storage.decks.splice(index, 1);
-            if (this.storage.deck_index >= index) {
+            if (this.storage.deck_index >= index && this.storage.deck_index > 0) {
                 this.storage.deck_index -= 1
             }
         },
