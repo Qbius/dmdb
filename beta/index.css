@@ -44,7 +44,7 @@ html, body, #app {
 #side {
     display: flex;
     flex-direction: column;
-    min-width: 300px;
+    width: 300px;
 }
 
 #queries {
@@ -262,6 +262,10 @@ html, body, #app {
 
 .tab-pane {
     padding: 0px!important;
+}
+
+.nav-link {
+    width: 105px!important;
 }
 
 .tab-title-backs {

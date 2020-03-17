@@ -657,7 +657,7 @@ var app = new Vue({
         file_error: false,
         copied: false,
         decks_filter: "",
-        storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: 'New deck', text: ''}, {name: 'New deck', text: ''}]},
+        storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
         tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
         blocker_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/blocker.png',
@@ -772,7 +772,7 @@ var app = new Vue({
             });
         },
         new_deck() {
-            this.storage.decks.push({name: 'New deck', text: ''});
+            this.storage.decks.push({name: '', text: ''});
             this.storage.deck_index = this.storage.decks.length - 1;
         },
         delete_active_deck() {
@@ -832,11 +832,9 @@ var app = new Vue({
         init_from_deck(deckstr) {
             const[deckcode, decktitle] = deckstr.split('@')
             const res = deckcode.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
-            this.storage.decks[this.storage.decks.length - 1].name = decktitle ? decktitle : "New deck";
-            this.storage.decks[this.storage.decks.length - 1].text = res;
-            this.storage.decks.push({name: 'New deck', text: ''});
+            this.storage.decks.push({name: '', text: ''});
             setTimeout(() => {
-                this.storage.deck_index = this.storage.decks.length - 2;
+                this.storage.deck_index = this.storage.decks.length - 1;
                 this.searchtypemodel = 'deck';
             });
         },
@@ -856,7 +854,7 @@ var app = new Vue({
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             const deckcode = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).filter(([count, name]) => count > 0).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
-            const url = window.location.href.split('?')[0] + '?shared=' + deckcode + ((this.active_deck.name !== 'New deck') ? '@' + encodeURI(this.active_deck.name) : '');
+            const url = window.location.href.split('?')[0] + '?shared=' + deckcode + (this.active_deck.name ? '@' + encodeURI(this.active_deck.name) : '');
             let el = document.getElementById('copier');
             el.value = url;
             el.select();
@@ -901,7 +899,7 @@ var app = new Vue({
             return res;
         },
         decktext_style() {
-            return 'width: ' + this.el_property('decktextcontainer', 'width') + '; height: ' + this.el_property('decktextcontainer', 'height') + ';';
+            return 'width: 300px; height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
             return this.active_deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
@@ -937,9 +935,11 @@ if (urlParams.has('shared')) {
 }
 else {
     setTimeout(() => {
-        app.storage.decks[app.storage.decks.length - 1].name = " ";
-        app.storage.decks[app.storage.decks.length - 1].text = " ";
-        app.storage.decks[app.storage.decks.length - 1].name = "New deck";
+        let old_name = app.storage.decks[app.storage.decks.length - 1].name;
+        let old_text = app.storage.decks[app.storage.decks.length - 1].text;
+        app.storage.decks[app.storage.decks.length - 1].name = "";
         app.storage.decks[app.storage.decks.length - 1].text = "";
+        app.storage.decks[app.storage.decks.length - 1].name = old_name;
+        app.storage.decks[app.storage.decks.length - 1].text = old_text;
     });
 }
