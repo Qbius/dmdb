@@ -603,10 +603,6 @@ const Model = class {
     }
 }
 
-if (!localStorage.dmdb) {
-    localStorage.dmdb = '{"deck_index": 0, "decks": [{"name": "New deck", "text": ""}]}';
-}
-
 var app = new Vue({
     el: '#app',
     data: {
@@ -657,7 +653,9 @@ var app = new Vue({
         addcard: "",
         getcards: () => {},
         always: "",
-        storage: JSON.parse(localStorage.dmdb),
+        rodo_show: !localStorage.agree,
+        file_error: false,
+        storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: 'New deck', text: ''}, {name: 'New deck', text: ''}]},
         tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
         blocker_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/blocker.png',
@@ -732,16 +730,62 @@ var app = new Vue({
         reset() {
             Object.values(this.models).forEach(model => model.reset());
         },
+        download_local_storage() {
+            let file = new Blob([JSON.stringify({decks: this.storage.decks})], {type: 'text/plain'});
+            let a = document.createElement("a");
+            let url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = 'dmdbLocalStorage.json';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);  
+            });
+        },
+        load_storage() {
+            let file_input = document.getElementById('invisiblefileinput');
+            if (!file_input.files) return;
+
+            const show_error = () => {
+                this.file_error = true;
+                setTimeout(() => this.file_error = false, 2020);
+            };
+
+            file_input.files[0].text().then(text => {
+                try {
+                    const parsed = JSON.parse(text);
+                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.every(deck => !console.log(deck) && (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
+                        this.storage.deck_index = 0;
+                        this.storage.decks = parsed.decks;
+                    }
+                    else {
+                        show_error();
+                    }
+                }
+                catch (error) {
+                    console.log("ok!");
+                    show_error();
+                }
+            });
+        },
         new_deck() {
             this.storage.decks.push({name: 'New deck', text: ''});
-            this.$forceUpdate();
-            setTimeout(() => this.storage.deck_index = this.storage.decks.length - 1, 100);
         },
-        tabclicked(index, decktitle) {
+        tabclicked(index) {
+            if (index === (this.storage.decks.length - 1)) {
+                this.new_deck();
+            }
+        },
+        tabtitleclicked(index, decktitle) {
             if (index === this.storage.deck_index) {
                 this.tabedits[index] = decktitle;
                 this.$forceUpdate();
-                setTimeout(() => document.getElementById('tab' + index.toString() + 'input').focus());
+                setTimeout(() => {
+                    let input = document.getElementById('tab' + index.toString() + 'input');
+                    input.focus();
+                    input.setSelectionRange(input.value.length, input.value.length);
+                });
             }
         },
         tabunclicked(index) {
@@ -760,18 +804,26 @@ var app = new Vue({
         },
         gettitlewidth(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');
-            return title ? ((title.offsetWidth + 3) + "px") : '5px';
+            return title ? ((title.offsetWidth + 3 + 5 * (title.textContent.split(' ').filter(token => token.length === 0).length)) + "px") : '5px';
         },
         gettitleheight(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');
-            console.log((title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '22px')
             return (title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '24px';
         },
         tabtitlechanged(index) {
             let title = document.getElementById('tab' + index.toString() + 'title');
             let input = document.getElementById('tab' + index.toString() + 'input');
+            console.log('"' + input.value + '"');
             title.textContent = input.value;
-            input.style.width = title.offsetWidth + "px";
+            input.style.width = (title.offsetWidth + 5 * (input.value.split(' ').filter(token => token.length === 0).length)) + "px";
+        },
+        closetab(index, e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.storage.decks.splice(index, 1);
+            if (this.storage.deck_index >= index) {
+                this.storage.deck_index -= 1
+            }
         },
         add_card(card) {
             if (this.active_deck.text.toLowerCase().includes(card)) {
@@ -893,7 +945,9 @@ var app = new Vue({
             return Object.keys(tcg).sort(this.sorting.function[this.sorting.type]);
         },
         deck_cards() {
-            localStorage.dmdb = JSON.stringify(this.storage);
+            if (localStorage.agree) {
+                localStorage.dmdb = JSON.stringify(this.storage);
+            }
             return this.cards.filter(c => this.show[c] && c in this.deck_cards_to_count);
         },
         show_deck() {

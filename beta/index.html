@@ -178,12 +178,23 @@
                 </div>
             </div>
             <div id="decks-tabs" v-show="show_deck">
-                <b-tabs v-model="storage.deck_index" card>
-                    <b-tab v-for="(deck, index) in storage.decks" @click="tabclicked(index, deck.name)" :ref="'tab' + index.toString()">
+                <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">
+                <b-tabs v-model="storage.deck_index" no-fade lazy card nav-class="tab-title-backs">
+                    <template v-slot:tabs-start>
+                        <b-dropdown id="dropdown-1" size="sm">
+                            <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download local storage</b-dropdown-item>
+                            <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load local storage from file</b-dropdown-item>
+                            <b-dropdown-item @click="localStorage.clear()">Clear local storage</b-dropdown-item>
+                        </b-dropdown>
+                    </template>
+                    <b-tab v-for="(deck, index) in storage.decks" @click="tabclicked(index)" :ref="'tab' + index.toString()">
                         <template v-slot:title>
-                            <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" lass="tab-title-container">
-                                <span :id="'tab' + index.toString() + 'title'" class="tab-title">{{deck.name}}</span>
-                                <input v-show="tabedits[index]" :style="'width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" class="tab-input" type="text" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
+                            <div class="tab-title-container-wrapper">
+                                <div :style="'width: ' + gettitlewidth(index) + '; height: ' + gettitleheight(index) + ';'" @click="tabtitleclicked(index, deck.name)" class="tab-title-container">
+                                    <font color="#000000"><strong><p :id="'tab' + index.toString() + 'title'" class="tab-title">{{ index < (storage.decks.length - 1) ? deck.name : '+' }}</p></strong></font>
+                                    <input v-show="tabedits[index]" :style="'font-weight: bold; width: ' + gettitlewidth(index)" :id="'tab' + index.toString() + 'input'" class="tab-input" type="text" @keydown="$event.stopPropagation()" @input="tabtitlechanged(index)" @keyup.enter="tabunclicked(index)" v-on:blur="tabunclicked(index)" v-model="deck.name">
+                                </div>
+                                <span v-if="index > 0 && index < (storage.decks.length - 1)" @click="closetab(index, $event)">&#x2716;</span>
                             </div>
                         </template>
                         <div id="cards-deck">
@@ -192,13 +203,17 @@
                             </div>
                         </div>
                     </b-tab>
-
-                    <template v-slot:tabs-end>
-                        <b-nav-item @click.prevent="new_deck()" href="#"><b>+</b></b-nav-item>
-                    </template>
                 </b-tabs>
             </div>
         </div>
+        <b-alert v-model="file_error" class="position-fixed fixed-bottom m-0 rounded-0" style="z-index: 2000;" variant="danger" dismissible>
+            Invalid json file!
+        </b-alert>
+        <b-alert v-if="rodo_show" v-model="rodo_show" class="position-fixed fixed-bottom m-0 rounded-0" style="display: flex; z-index: 2000;" variant="light" dismissible>
+            I'm using HTML5 Local Storage to save your decks between sessions and whatnot. It's like cookies, but even less than that.
+            <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false; localStorage.agree = true;">Accept</b-button>
+            <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false;">Dismiss</b-button>
+        </b-alert>
     </div>
 </div>
 
