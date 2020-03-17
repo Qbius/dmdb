@@ -655,6 +655,7 @@ var app = new Vue({
         always: "",
         rodo_show: !localStorage.agree,
         file_error: false,
+        copied: false,
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: 'New deck', text: ''}, {name: 'New deck', text: ''}]},
         tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
@@ -873,11 +874,17 @@ var app = new Vue({
         init_from_deck(deckstr) {
             const[deckcode, decktitle] = deckstr.split('@')
             const res = deckcode.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
-            this.storage.decks.push({name: decktitle ? decktitle : 'New deck', text: res});
+            this.storage.decks[this.storage.decks.length - 1].name = decktitle ? decktitle : "New deck";
+            this.storage.decks[this.storage.decks.length - 1].text = res;
+            this.storage.decks.push({name: 'New deck', text: ''});
             setTimeout(() => {
-                this.storage.deck_index = this.storage.decks.length - 1
+                this.storage.deck_index = this.storage.decks.length - 2;
                 this.searchtypemodel = 'deck';
             });
+        },
+        show_copied() {
+            this.copied = true;
+            setTimeout(() => this.copied = false, 2020);
         },
         copy_deck() {
             document.getElementById('decktext').select();
