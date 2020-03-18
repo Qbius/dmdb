@@ -851,6 +851,7 @@ var app = new Vue({
             else if (window.getSelection)
                 window.getSelection().removeAllRanges();
             document.getElementById('copybutton').focus();
+            this.show_copied();
         },
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
@@ -860,6 +861,7 @@ var app = new Vue({
             el.value = url;
             el.select();
             document.execCommand('copy');
+            this.show_copied();
         },
         deck_column(column) {
             return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
