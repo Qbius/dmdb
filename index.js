@@ -656,7 +656,8 @@ var app = new Vue({
         rodo_show: !localStorage.agree,
         file_error: false,
         copied: false,
-        storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: 'New deck', text: ''}, {name: 'New deck', text: ''}]},
+        decks_filter: "",
+        storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
         tabedits: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
         blocker_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/blocker.png',
@@ -756,7 +757,7 @@ var app = new Vue({
             file_input.files[0].text().then(text => {
                 try {
                     const parsed = JSON.parse(text);
-                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.length >= 2 && parsed.decks.every(deck => !console.log(deck) && (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
+                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.length >= 2 && parsed.decks.every(deck => (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
                         this.storage.deck_index = 0;
                         this.storage.decks = parsed.decks;
                     }
@@ -765,73 +766,22 @@ var app = new Vue({
                     }
                 }
                 catch (error) {
-                    console.log("ok!");
                     show_error();
                 }
             });
         },
         new_deck() {
-            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
-            this.storage.decks[this.storage.decks.length - 1].text = "";
-            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "New deck";
-            this.storage.decks.push({name: 'New deck', text: ''});
+            this.storage.decks.push({name: '', text: ''});
+            this.storage.deck_index = this.storage.decks.length - 1;
         },
-        tabclicked(index) {
-            if (index === (this.storage.decks.length - 1)) {
-                this.new_deck();
+        delete_active_deck() {
+            if (this.storage.decks.length === 1) return;
+            
+            let deleted_index = this.storage.deck_index;
+            if (deleted_index === (this.storage.decks.length - 1)) {
+                this.storage.deck_index -= 1;
             }
-        },
-        tabtitleclicked(index, decktitle) {
-            if (index === this.storage.deck_index) {
-                this.tabedits[index] = decktitle;
-                this.$forceUpdate();
-                setTimeout(() => {
-                    let input = document.getElementById('tab' + index.toString() + 'input');
-                    input.focus();
-                    input.setSelectionRange(input.value.length, input.value.length);
-                });
-            }
-        },
-        tabunclicked(index) {
-            if (this.tabedits[index]) {
-                let old = this.tabedits[index];
-                delete this.tabedits[index]; 
-                this.$forceUpdate();
-                setTimeout(() => {
-                    if (this.storage.decks[index].name.trim().length === 0) {
-                        document.getElementById('tab' + index.toString() + 'title').textContent = old;
-                        this.storage.decks[index].name = old;
-                        this.$forceUpdate();
-                    }
-                });
-            }
-        },
-        gettitlewidth(index) {
-            let title = document.getElementById('tab' + index.toString() + 'title');
-            return title ? ((title.offsetWidth + 3 + 5 * (title.textContent.split(' ').filter(token => token.length === 0).length)) + "px") : '5px';
-        },
-        gettitleheight(index) {
-            let title = document.getElementById('tab' + index.toString() + 'title');
-            return (title && title.offsetHeight > 0) ? (title.offsetHeight + "px") : '24px';
-        },
-        tabtitlechanged(index) {
-            let title = document.getElementById('tab' + index.toString() + 'title');
-            let input = document.getElementById('tab' + index.toString() + 'input');
-
-            title.textContent = input.value;
-            input.style.width = (title.offsetWidth + 5 * (input.value.split(' ').filter(token => token.length === 0).length)) + "px";
-        },
-        closetab(index, e) {
-            e.stopPropagation();
-            e.preventDefault();
-            this.storage.decks.splice(index, 1);
-            if (this.storage.deck_index >= index && this.storage.deck_index > 0) {
-                this.storage.deck_index -= 1
-            }
-            this.storage.decks[this.storage.decks.length - 1].name = "New deck";
-            this.storage.decks[this.storage.decks.length - 1].text = "";
-            document.getElementById('tab' + (this.storage.decks.length - 1).toString() + 'title').textContent = "+";
-            this.$forceUpdate();
+            this.storage.decks.splice(deleted_index, 1);
         },
         add_card(card) {
             if (this.active_deck.text.toLowerCase().includes(card)) {
@@ -881,11 +831,9 @@ var app = new Vue({
         init_from_deck(deckstr) {
             const[deckcode, decktitle] = deckstr.split('@')
             const res = deckcode.match(/.{1,2}/g).map(([first, second]) => 62 * base62.from(first) + base62.from(second)).map(n => (Math.floor(n / 890) + 1).toString() + 'x ' + tcg[Object.keys(tcg)[n % 890]].name).join('\n');
-            this.storage.decks[this.storage.decks.length - 1].name = decktitle ? decktitle : "New deck";
-            this.storage.decks[this.storage.decks.length - 1].text = res;
-            this.storage.decks.push({name: 'New deck', text: ''});
+            this.storage.decks.push({name: decktitle ? decktitle : '', text: res});
             setTimeout(() => {
-                this.storage.deck_index = this.storage.decks.length - 2;
+                this.storage.deck_index = this.storage.decks.length - 1;
                 this.searchtypemodel = 'deck';
             });
         },
@@ -905,7 +853,7 @@ var app = new Vue({
         share_deck() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             const deckcode = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).filter(([count, name]) => count > 0).map(([count, name]) => ((count - 1) * 890) + Object.keys(tcg).indexOf(name.toLowerCase())).map(n => base62.to(Math.floor(n / 62)) + base62.to(n % 62)).join('');
-            const url = window.location.href.split('?')[0] + '?shared=' + deckcode + ((this.active_deck.name !== 'New deck') ? '@' + encodeURI(this.active_deck.name) : '');
+            const url = window.location.href.split('?')[0] + '?shared=' + deckcode + (this.active_deck.name ? '@' + encodeURI(this.active_deck.name) : '');
             let el = document.getElementById('copier');
             el.value = url;
             el.select();
@@ -913,6 +861,41 @@ var app = new Vue({
         },
         deck_column(column) {
             return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
+        },
+        gradient_from_civs(obj) {
+            const{fire: fire, darkness: darkness, water: water, light: light, nature: nature} = obj;
+            if (!fire && !darkness && !water && !light && !nature) {
+                return '#000000 0% 100%';
+            }
+            
+            const colors2totals = {
+                '#dc3545': fire,
+                '#343a40': darkness,
+                '#007bff': water,
+                '#ffc107': light,
+                '#28a745': nature,
+            };
+            
+            const n = a => a ? a : 0;
+            const decktotal = n(fire) + n(darkness) + n(water) + n(light) + n(nature);
+            const float_to_rc = a => Math.round((n(a) / decktotal) * 100)
+            const processed_civs = Object.entries(colors2totals).filter(([_, total]) => total).reduce((newarray, [color, total]) => [...newarray, [color, float_to_rc(total) + ((newarray.length > 0) ? newarray[newarray.length - 1][1] : 0)]], []);
+            
+            if (processed_civs.length === 1) {
+                let res = processed_civs[0][0] + ' 0% 100%';
+                console.log(res);
+                return res;
+            }
+            else {
+                let res = processed_civs[0][0] + ' ' + (processed_civs[0][1] - 5).toString() + '%';
+                for (let i = 1; i < processed_civs.length; ++i) {
+                    const[prevcolor, prevtotal] = processed_civs[i - 1];
+                    const[currcolor, currtotal] = processed_civs[i];
+                    res += ', ' + currcolor + ' ' + (prevtotal + 5).toString() + '% ' + (currtotal - 5).toString() + '%';
+                }
+                console.log(res);
+                return res;
+            }
         },
     },
     mounted() {
@@ -950,7 +933,7 @@ var app = new Vue({
             return res;
         },
         decktext_style() {
-            return 'width: ' + this.el_property('decktextcontainer', 'width') + '; height: ' + this.el_property('decktextcontainer', 'height') + ';';
+            return 'width: 300px; height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
             return this.active_deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
@@ -968,12 +951,24 @@ var app = new Vue({
             return this.searchtypemodel === "deck";
         },
         active_deck() {
+            this.decks_filter = "";
             return this.storage.decks[this.storage.deck_index];
         },
         show() {
             const modified_models = Object.values(this.models).filter(model => model.modified);
             return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: modified_models.every(model => model.test(tcg[card]))}), {});
-        }
+        },
+        deck_list_options() {
+            return this.storage.decks.map(({name: deckname}, index) => ({text: deckname ? deckname : 'Deck ' + (index + 1).toString(), value: index})).filter(({text: deckname}) => !this.decks_filter || deckname.toLowerCase().includes(this.decks_filter.toLowerCase()));
+        },
+        decks_civ_counts() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce((outer_obj, [count, card]) => Object.assign(outer_obj, tcg[card].civilization.reduce((inner_obj, civ) => Object.assign(inner_obj, {[civ]: count + (outer_obj[civ] ? outer_obj[civ] : 0)}), {})), {}));
+        },
+        spells_counts() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce(([spelltotal, total], [count, card]) => [spelltotal + ((tcg[card]['card type'] === 'spell') ? count : 0), total + count], [0, 0])).map(([spelltotal, total]) => (!console.log(spelltotal) && total > 0) ? spelltotal / total : 0);
+        },
     }
 });
 
@@ -983,9 +978,11 @@ if (urlParams.has('shared')) {
 }
 else {
     setTimeout(() => {
-        app.storage.decks[app.storage.decks.length - 1].name = " ";
-        app.storage.decks[app.storage.decks.length - 1].text = " ";
-        app.storage.decks[app.storage.decks.length - 1].name = "New deck";
+        let old_name = app.storage.decks[app.storage.decks.length - 1].name;
+        let old_text = app.storage.decks[app.storage.decks.length - 1].text;
+        app.storage.decks[app.storage.decks.length - 1].name = "";
         app.storage.decks[app.storage.decks.length - 1].text = "";
+        app.storage.decks[app.storage.decks.length - 1].name = old_name;
+        app.storage.decks[app.storage.decks.length - 1].text = old_text;
     });
 }

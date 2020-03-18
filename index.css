@@ -2,6 +2,7 @@ html, body, #app {
     margin: auto;
     width: 100%;
     height: 100%;
+    overflow: hidden;
 }
 
 #app {
@@ -44,7 +45,7 @@ html, body, #app {
 #side {
     display: flex;
     flex-direction: column;
-    min-width: 300px;
+    width: 300px;
 }
 
 #queries {
@@ -54,7 +55,6 @@ html, body, #app {
     flex-direction: column;
     padding-top: 4px;
     padding-bottom: 4px;
-    border-radius: 12px;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
 }
@@ -72,7 +72,6 @@ html, body, #app {
     flex: 1;
     display: flex;
     flex-direction: column;
-    border-radius: 12px;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
 }
@@ -235,6 +234,16 @@ html, body, #app {
     padding-bottom: 0px!important;
 }
 
+.btn-outline-secondary {
+    border-left: 0px!important;
+    border-right: 0px!important;
+    border-radius: 0px!important;
+}
+
+.dropdown-toggle {
+    border-radius: 0px!important;
+}
+
 .close {
     display: none!important;
 }
@@ -243,13 +252,21 @@ html, body, #app {
     display: none!important;
 }
 
+.form-control {
+    border-radius: 0px!important;
+}
+
 .card-header {
     padding-top: 0px!important;
     padding-left: 10px!important;
 }
 
 .tab-pane {
-    padding: 5px!important;
+    padding: 0px!important;
+}
+
+.nav-link {
+    width: 105px!important;
 }
 
 .tab-title-backs {
@@ -350,19 +367,37 @@ input[class='corer custom-range']::-moz-range-track {
     background-image: linear-gradient(to right, white var(--lowerbound), var(--controlcolor) var(--lowerbound) var(--upperbound), white var(--upperbound) 100%);   
 }
 
-#decks-tabs {
-    flex: 1;
-}
-
 #cards {
     user-select: none;
-    border-radius: 12px;
     flex: 1;
     display: flex;
     background-color: var(--contentcolor);
     opacity: var(--contentopacity);
     overflow-y: scroll;
     scrollbar-width: none;
+    margin-right: 1px;
+}
+
+#decklist {
+    margin-left: 1px;
+    width: 220px;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--contentcolor);
+    opacity: var(--contentopacity);
+}
+
+#decklist-radio {
+    flex: 1;
+    overflow-y: scroll;
+    border-color: var(--controlcolor);
+    scrollbar-width: none;
+}
+
+#decklist-radio::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 body, .tab-title, .tab-input {
@@ -428,4 +463,9 @@ body, .tab-title, .tab-input {
 
 .card-image:hover {
     filter: brightness(130%);
+}
+
+.decktitle:hover {
+    filter: grayscale(100%); 
+    filter: brightness(200%);
 }
