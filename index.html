@@ -152,12 +152,13 @@
                     <textarea id="decktext" spellcheck="false" :style="decktext_style" v-model="active_deck.text"></textarea>
                     <div id="deckoverlay-container-wrapper" :style="decktext_style">
                         <div id="deckoverlay-container" :style="'width: ' + el_property('decktext', 'width') + '; height: ' + el_property('decktext', 'height') + ';'">
-                            <div v-for="card in deck_lines" class="deckoverlay">
+                            <div v-for="[count, card] in deck_lines" class="deckoverlay">
                                 <div v-if="is_card(card) && is.shield_trigger(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="shieldtrigger_icon"></div>
                                 <div v-if="is_card(card) && is.blocker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="blocker_icon"></div>
                                 <div v-if="is_card(card) && is.evolution(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="evolutioncreature_icon"><font size="1px">{{ evolution_baits_count(card).toString() }}</font></div>
                                 <div v-if="is_card(card) && is.wave_striker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="wavestriker_icon"></div>
                                 <div v-if="is_card(card) && is.survivor(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="survivor_icon"></div>
+                                <div v-if="!is_card(card) && count" class="deckoverlay-icon-wrapper"><span>&#x2757;</span></div>
                             </div>
                         </div>
                     </div>
@@ -234,6 +235,7 @@
             <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false;">Dismiss</b-button>
         </b-alert>
     </div>
+    <img class="popup" style="pointer-events: none; position: absolute; z-index: 10000; width: 222px; height: 307px;" id="preview-image">
 </div>
 
     <script src="index.js"></script>

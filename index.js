@@ -660,6 +660,11 @@ var app = new Vue({
         decks_filter: "",
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
         tabedits: {},
+        preview: {
+            top: '0px',
+            left: '0px',
+            img: ""
+        },
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
         blocker_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/blocker.png',
         evolutioncreature_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/evolutioncreature.png',
@@ -811,6 +816,20 @@ var app = new Vue({
         is_card(card) {
             return card.toLowerCase() in tcg;
         },
+        decktext_hover({srcElement: el, layerY: offset, pageX: x, pageY: y}) {
+            const index = Math.floor((offset + document.getElementById('decktext').scrollTop) / 24);
+            let preview_img = document.getElementById('preview-image');
+            if (el.id === 'decktext' && index < this.deck_lines.length && this.deck_lines[index][0]) {
+                preview_img.style.display = 'block';
+                preview_img.style.left = (x + 5).toString() + 'px';
+                preview_img.style.top = (y + 5).toString() + 'px';
+                let card = this.deck_lines[index][1].toLowerCase();
+                preview_img.src = (card in tcg) ? this.card_image(card) : ((window.location.href.includes('beta') ? '../' : './') + 'icons/notfound.jpg');
+            }
+            else {
+                preview_img.style.display = 'none';
+            }
+        },
         cardinfo(card) {
             return (card.toLowerCase() in tcg) ? tcg[card.toLowerCase()] : {};
         },
@@ -909,8 +928,10 @@ var app = new Vue({
 
         let decktextarea = document.getElementById('decktext');
         decktextarea.addEventListener('scroll', () => {
+            console.log('ok');
             document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
         });
+        window.addEventListener('mousemove', this.decktext_hover);
 
         Object.keys(tcg).forEach((_, index) => {
             let div = document.getElementById('card' + index.toString())
@@ -922,10 +943,6 @@ var app = new Vue({
                 div.appendChild(img);
             }, index);
         });
-
-        for (let el of document.getElementsByClassName('deckoverlay')) {
-            el.addEventListener('mouseover', () => el.style.background_color = "red");
-        }
     },
     computed: {
         cards_per_row() {
@@ -940,7 +957,8 @@ var app = new Vue({
             return 'width: 300px; height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
-            return this.active_deck.text.split('\n').map(line => line.trim().substring(line.search(' ')).trim());
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            return this.active_deck.text.split('\n').map(cardsplit);
         },
         cards() {
             return Object.keys(tcg).sort(this.sorting.function[this.sorting.type]);
