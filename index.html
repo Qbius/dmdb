@@ -184,6 +184,7 @@
                     <div id="cards-deck">
                         <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                             <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
+                            <div style="position: absolute; z-index: 5; bottom: 32px; left: 24px; width: 174px; height: 72px; background-color: red"></div>
                         </div>
                     </div>
                 </div>
@@ -235,7 +236,7 @@
             <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false;">Dismiss</b-button>
         </b-alert>
     </div>
-    <img class="popup" style="pointer-events: none; position: absolute; z-index: 10000; width: 222px; height: 307px;" id="preview-image">
+    <img class="popup" style="display: none; pointer-events: none; position: absolute; z-index: 10000; width: 222px; height: 307px; border-radius: 10px;" id="preview-image">
 </div>
 
     <script src="index.js"></script>
