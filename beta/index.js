@@ -881,13 +881,21 @@ var app = new Vue({
             const float_to_rc = a => Math.round((n(a) / decktotal) * 100)
             const processed_civs = Object.entries(colors2totals).filter(([_, total]) => total).reduce((newarray, [color, total]) => [...newarray, [color, float_to_rc(total) + ((newarray.length > 0) ? newarray[newarray.length - 1][1] : 0)]], []);
             
-            let res = processed_civs[0][0] + ' ' + (processed_civs[0][1] - 5).toString() + '%';
-            for (let i = 1; i < processed_civs.length; ++i) {
-                const[prevcolor, prevtotal] = processed_civs[i - 1];
-                const[currcolor, currtotal] = processed_civs[i];
-                res += ', ' + currcolor + ' ' + (prevtotal + 5).toString() + '% ' + (currtotal - 5).toString() + '%';
+            if (processed_civs.length === 1) {
+                let res = processed_civs[0][0] + ' 0% 100%';
+                console.log(res);
+                return res;
             }
-            return res;
+            else {
+                let res = processed_civs[0][0] + ' ' + (processed_civs[0][1] - 5).toString() + '%';
+                for (let i = 1; i < processed_civs.length; ++i) {
+                    const[prevcolor, prevtotal] = processed_civs[i - 1];
+                    const[currcolor, currtotal] = processed_civs[i];
+                    res += ', ' + currcolor + ' ' + (prevtotal + 5).toString() + '% ' + (currtotal - 5).toString() + '%';
+                }
+                console.log(res);
+                return res;
+            }
         },
     },
     mounted() {

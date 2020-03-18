@@ -204,7 +204,7 @@
                             <strong><font color="#6c757d">DECKS</font></strong>
                         </template>
                         <div style="display: flex; flex-direction: column;">
-                            <div v-for="(deck, index) in storage.decks" v-show="deck.name.toLowerCase().includes(decks_filter.toLowerCase())" @click="storage.deck_index = index;" class="decktitle" :style="((storage.deck_index === index) ? 'border: 5px solid; height: 40px;' : 'margin: 5px; height: 30px; ') + 'border-color: #6c757d; display: flex; justify-content: center; background-image: linear-gradient(' + Math.round(90 * spells_counts[index] + 90).toString() + 'deg, ' + gradient_from_civs(decks_civ_counts[index]) + ')'">
+                            <div v-for="(deck, index) in storage.decks" v-show="deck.name.toLowerCase().includes(decks_filter.toLowerCase())" @click="storage.deck_index = index;" class="decktitle" :style="((storage.deck_index === index) ? 'border: 6px solid; height: 46px;' : 'margin: 6px; margin-top: 3px; margin-bottom: 3px; height: 40px; ') + 'border-color: #6c757d; display: flex; justify-content: center; background-image: linear-gradient(' + Math.round(90 * spells_counts[index] + 90).toString() + 'deg, ' + gradient_from_civs(decks_civ_counts[index]) + ')'">
                                 <b-badge v-show="deck.name" pill variant="light" style="user-select: none; margin: auto; filter: brightness(100%);"><font color="#6c757d"><strong>{{ deck.name }}</strong></font></b-badge>
                             </div>
                             <!--<b-form-radio-group id="btn-radios-3" v-model="storage.deck_index" :options="deck_list_options" buttons button-variant="outline-secondary" button-squared stacked></b-form-radio-group>-->
