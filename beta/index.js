@@ -865,7 +865,7 @@ var app = new Vue({
         gradient_from_civs(obj) {
             const{fire: fire, darkness: darkness, water: water, light: light, nature: nature} = obj;
             if (!fire && !darkness && !water && !light && !nature) {
-                return '#dee2e6 0% 100%';
+                return '#000000 0% 100%';
             }
             
             const colors2totals = {
