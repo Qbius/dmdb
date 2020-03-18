@@ -158,7 +158,7 @@
                                 <div v-if="is_card(card) && is.evolution(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="evolutioncreature_icon"><font size="1px">{{ evolution_baits_count(card).toString() }}</font></div>
                                 <div v-if="is_card(card) && is.wave_striker(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="wavestriker_icon"></div>
                                 <div v-if="is_card(card) && is.survivor(cardinfo(card))" class="deckoverlay-icon-wrapper"><img class="deckoverlay-icon" :src="survivor_icon"></div>
-                                <div v-if="!is_card(card) && card.includes(' ') && count" class="deckoverlay-icon-wrapper"><span>&#x2757;</span></div>
+                                <div v-if="!is_card(card) && count" class="deckoverlay-icon-wrapper"><span>&#x2757;</span></div>
                             </div>
                         </div>
                     </div>
