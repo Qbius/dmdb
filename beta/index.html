@@ -188,14 +188,14 @@
         </div>
         <div id="decklist">
             <div id="deckname-editor" style="display: flex;">
-                <b-dropdown right size="sm">
+                <b-dropdown right size="sm" style="width: 10%;">
                     <b-dropdown-item :disabled.sync="storage.decks.length === 1" @click="delete_active_deck()">Delete deck</b-dropdown-item>
                     <b-dropdown-divider></b-dropdown-divider>
                     <b-dropdown-item :disabled.sync="!localStorage.agree" @click="download_local_storage()">Download decks to file</b-dropdown-item>
                     <b-dropdown-item :disabled.sync="!localStorage.agree" @click="document.getElementById('invisiblefileinput').click()">Load decks from file</b-dropdown-item>
                     <b-dropdown-item @click="localStorage.clear()">Clear local storage</b-dropdown-item>
                 </b-dropdown>
-                <b-form-input squared id="deckname" v-model="active_deck.name" placeholder="Deck name..."></input>
+                <b-form-input squared id="deckname" style="width: 90%;" v-model="active_deck.name" placeholder="Deck name..."></input>
             </div>
             <div id="decklist-radio">
                 <b-tabs no-fade fill lazy card nav-class="tab-title-backs">
