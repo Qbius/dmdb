@@ -173,15 +173,17 @@
         </div>
 
         <div id="cards">
-            <div id="cards-queried" v-show="!show_deck">
-                <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+            <div id="cards-centered" :style="'width: ' + (cards_per_row * 224 + 2).toString() + 'px;'">
+                <div id="cards-queried" v-show="!show_deck">
+                    <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+                    </div>
                 </div>
-            </div>
-            <div id="decks-tabs" v-show="show_deck">
-                <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">          
-                <div id="cards-deck">
-                    <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
-                        <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
+                <div id="decks-tabs" v-show="show_deck">
+                    <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">          
+                    <div id="cards-deck">
+                        <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
+                            <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
+                        </div>
                     </div>
                 </div>
             </div>

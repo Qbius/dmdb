@@ -375,7 +375,13 @@ input[class='corer custom-range']::-moz-range-track {
     opacity: var(--contentopacity);
     overflow-y: scroll;
     scrollbar-width: none;
+    justify-content: center;
     margin-right: 1px;
+}
+
+#cards-centered {
+    margin-top: 5px;
+    display: flex;
 }
 
 #decklist {
