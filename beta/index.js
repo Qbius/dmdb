@@ -656,6 +656,7 @@ var app = new Vue({
         rodo_show: !localStorage.agree,
         file_error: false,
         copied: false,
+        copied_msg: "",
         decks_filter: "",
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
         tabedits: {},
@@ -851,6 +852,7 @@ var app = new Vue({
             else if (window.getSelection)
                 window.getSelection().removeAllRanges();
             document.getElementById('copybutton').focus();
+            this.copied_msg = "Copied to clipboard!";
             this.show_copied();
         },
         share_deck() {
@@ -861,6 +863,7 @@ var app = new Vue({
             el.value = url;
             el.select();
             document.execCommand('copy');
+            this.copied_msg = "Link copied to clipboard!";
             this.show_copied();
         },
         deck_column(column) {
