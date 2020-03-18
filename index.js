@@ -882,9 +882,7 @@ var app = new Vue({
             const processed_civs = Object.entries(colors2totals).filter(([_, total]) => total).reduce((newarray, [color, total]) => [...newarray, [color, float_to_rc(total) + ((newarray.length > 0) ? newarray[newarray.length - 1][1] : 0)]], []);
             
             if (processed_civs.length === 1) {
-                let res = processed_civs[0][0] + ' 0% 100%';
-                console.log(res);
-                return res;
+                return processed_civs[0][0] + ' 0% 100%';;
             }
             else {
                 let res = processed_civs[0][0] + ' ' + (processed_civs[0][1] - 5).toString() + '%';
@@ -893,7 +891,6 @@ var app = new Vue({
                     const[currcolor, currtotal] = processed_civs[i];
                     res += ', ' + currcolor + ' ' + (prevtotal + 5).toString() + '% ' + (currtotal - 5).toString() + '%';
                 }
-                console.log(res);
                 return res;
             }
         },
@@ -955,6 +952,14 @@ var app = new Vue({
             return this.storage.decks[this.storage.deck_index];
         },
         show() {
+            setTimeout(() => {
+                for (let el of document.getElementsByClassName('b-form-tag')) {
+                    el.addEventListener('click', () => {
+                        this.models.tags.data.rows = this.models.tags.data.rows.map(row => row.filter(tag => tag !== el.innerText));
+                    });
+                }
+            }, 250);
+
             const modified_models = Object.values(this.models).filter(model => model.modified);
             return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: modified_models.every(model => model.test(tcg[card]))}), {});
         },
@@ -967,7 +972,7 @@ var app = new Vue({
         },
         spells_counts() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
-            return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce(([spelltotal, total], [count, card]) => [spelltotal + ((tcg[card]['card type'] === 'spell') ? count : 0), total + count], [0, 0])).map(([spelltotal, total]) => (!console.log(spelltotal) && total > 0) ? spelltotal / total : 0);
+            return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce(([spelltotal, total], [count, card]) => [spelltotal + ((tcg[card]['card type'] === 'spell') ? count : 0), total + count], [0, 0])).map(([spelltotal, total]) => (total > 0) ? spelltotal / total : 0);
         },
     }
 });
