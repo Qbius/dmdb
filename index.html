@@ -226,7 +226,7 @@
             Invalid json file!
         </b-alert>
         <b-alert v-model="copied" class="position-fixed fixed-bottom m-0 rounded-0" style="z-index: 2000;" variant="success" dismissible>
-            Copied to clipboard!
+            {{ copied_msg }}
         </b-alert>
         <b-alert v-if="rodo_show" v-model="rodo_show" class="position-fixed fixed-bottom m-0 rounded-0" style="display: flex; z-index: 2000;" variant="light" dismissible>
             I'm using HTML5 Local Storage to save your decks between sessions and whatnot. It's like cookies, but even less than that.
