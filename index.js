@@ -822,7 +822,7 @@ var app = new Vue({
             if (el.id === 'decktext' && index < this.deck_lines.length && this.deck_lines[index][0]) {
                 preview_img.style.display = 'block';
                 preview_img.style.left = (x + 5).toString() + 'px';
-                preview_img.style.top = (y + 5).toString() + 'px';
+                preview_img.style.top = (y + 5 - 307).toString() + 'px';
                 let card = this.deck_lines[index][1].toLowerCase();
                 preview_img.src = (card in tcg) ? this.card_image(card) : ((window.location.href.includes('beta') ? '../' : './') + 'icons/notfound.jpg');
             }
