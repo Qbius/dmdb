@@ -922,7 +922,7 @@ var app = new Vue({
     },
     computed: {
         cards_per_row() {
-            return Math.floor(Math.round(this.el_property('cards', 'width').split(/[^\d]/)[0]) / 226);
+            return Math.floor(Math.round(this.el_property('cards', 'width').split(/[^\d]/)[0]) / 224);
         },
         deck_cards_to_count() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
