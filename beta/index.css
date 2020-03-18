@@ -380,6 +380,7 @@ input[class='corer custom-range']::-moz-range-track {
 #decklist {
     margin-left: 1px;
     width: 220px;
+    max-height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: var(--contentcolor);
@@ -461,4 +462,9 @@ body, .tab-title, .tab-input {
 
 .card-image:hover {
     filter: brightness(130%);
+}
+
+.decktitle:hover {
+    filter: grayscale(100%); 
+    filter: brightness(200%);
 }

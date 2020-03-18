@@ -757,7 +757,7 @@ var app = new Vue({
             file_input.files[0].text().then(text => {
                 try {
                     const parsed = JSON.parse(text);
-                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.length >= 2 && parsed.decks.every(deck => !console.log(deck) && (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
+                    if (parsed && parsed.decks && Array.isArray(parsed.decks) && parsed.decks.length >= 2 && parsed.decks.every(deck => (deck.name !== undefined) && (typeof deck.name === 'string') && (deck.text !== undefined) && (typeof deck.text === 'string') && Object.keys(deck).length === 2)) {
                         this.storage.deck_index = 0;
                         this.storage.decks = parsed.decks;
                     }
@@ -766,7 +766,6 @@ var app = new Vue({
                     }
                 }
                 catch (error) {
-                    console.log("ok!");
                     show_error();
                 }
             });
@@ -863,6 +862,33 @@ var app = new Vue({
         deck_column(column) {
             return this.deck_cards.filter((card, index) => (index % this.cards_per_row) === column);
         },
+        gradient_from_civs(obj) {
+            const{fire: fire, darkness: darkness, water: water, light: light, nature: nature} = obj;
+            if (!fire && !darkness && !water && !light && !nature) {
+                return '#dee2e6 0% 100%';
+            }
+            
+            const colors2totals = {
+                '#dc3545': fire,
+                '#343a40': darkness,
+                '#007bff': water,
+                '#ffc107': light,
+                '#28a745': nature,
+            };
+            
+            const n = a => a ? a : 0;
+            const decktotal = n(fire) + n(darkness) + n(water) + n(light) + n(nature);
+            const float_to_rc = a => Math.round((n(a) / decktotal) * 100)
+            const processed_civs = Object.entries(colors2totals).filter(([_, total]) => total).reduce((newarray, [color, total]) => [...newarray, [color, float_to_rc(total) + ((newarray.length > 0) ? newarray[newarray.length - 1][1] : 0)]], []);
+            
+            let res = processed_civs[0][0] + ' ' + (processed_civs[0][1] - 5).toString() + '%';
+            for (let i = 1; i < processed_civs.length; ++i) {
+                const[prevcolor, prevtotal] = processed_civs[i - 1];
+                const[currcolor, currtotal] = processed_civs[i];
+                res += ', ' + currcolor + ' ' + (prevtotal + 5).toString() + '% ' + (currtotal - 5).toString() + '%';
+            }
+            return res;
+        },
     },
     mounted() {
         let decktext = document.getElementById('decktext');
@@ -917,6 +943,7 @@ var app = new Vue({
             return this.searchtypemodel === "deck";
         },
         active_deck() {
+            this.decks_filter = "";
             return this.storage.decks[this.storage.deck_index];
         },
         show() {
@@ -925,7 +952,15 @@ var app = new Vue({
         },
         deck_list_options() {
             return this.storage.decks.map(({name: deckname}, index) => ({text: deckname ? deckname : 'Deck ' + (index + 1).toString(), value: index})).filter(({text: deckname}) => !this.decks_filter || deckname.toLowerCase().includes(this.decks_filter.toLowerCase()));
-        }
+        },
+        decks_civ_counts() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce((outer_obj, [count, card]) => Object.assign(outer_obj, tcg[card].civilization.reduce((inner_obj, civ) => Object.assign(inner_obj, {[civ]: count + (outer_obj[civ] ? outer_obj[civ] : 0)}), {})), {}));
+        },
+        spells_counts() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce(([spelltotal, total], [count, card]) => [spelltotal + ((tcg[card]['card type'] === 'spell') ? count : 0), total + count], [0, 0])).map(([spelltotal, total]) => (!console.log(spelltotal) && total > 0) ? spelltotal / total : 0);
+        },
     }
 });
 
