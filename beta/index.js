@@ -928,7 +928,6 @@ var app = new Vue({
 
         let decktextarea = document.getElementById('decktext');
         decktextarea.addEventListener('scroll', () => {
-            console.log('ok');
             document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
         });
         window.addEventListener('mousemove', this.decktext_hover);
@@ -954,7 +953,7 @@ var app = new Vue({
             return res;
         },
         decktext_style() {
-            return 'width: 300px; height: ' + this.el_property('decktextcontainer', 'height') + ';';
+            return 'height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
@@ -1005,14 +1004,4 @@ var app = new Vue({
 var urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('shared')) {
     app.init_from_deck(urlParams.get('shared'));
-}
-else {
-    setTimeout(() => {
-        let old_name = app.storage.decks[app.storage.decks.length - 1].name;
-        let old_text = app.storage.decks[app.storage.decks.length - 1].text;
-        app.storage.decks[app.storage.decks.length - 1].name = "";
-        app.storage.decks[app.storage.decks.length - 1].text = "";
-        app.storage.decks[app.storage.decks.length - 1].name = old_name;
-        app.storage.decks[app.storage.decks.length - 1].text = old_text;
-    });
 }
