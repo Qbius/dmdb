@@ -658,6 +658,7 @@ var app = new Vue({
         copied: false,
         copied_msg: "",
         decks_filter: "",
+        prev_decks: {},
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
         tabedits: {},
         preview: {
@@ -789,29 +790,46 @@ var app = new Vue({
             }
             this.storage.decks.splice(deleted_index, 1);
         },
-        add_card(card) {
-            if (this.active_deck.text.toLowerCase().includes(card)) {
-                const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
+        str_add_card(decktext, card) {
+            if (decktext.toLowerCase().includes(card)) {
+                const card_line = decktext.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
-                this.active_deck.text = Math.round(countstr) >= 4? this.active_deck.text : this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
+                return Math.round(countstr) >= 4 ? decktext : decktext.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
             }
             else {
-                this.active_deck.text = (this.active_deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (this.active_deck.text + '\n1x ' + tcg[card].name);
-                let decktext = document.getElementById("decktext");
-                decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
+                return (decktext.trim().length === 0) ? ('1x ' + tcg[card].name) : (decktext + '\n1x ' + tcg[card].name);
             }
         },
-        remove_card(card) {
-            if (this.active_deck.text.toLowerCase().includes(card)) {
-                const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
+        str_remove_card(decktext,card) {
+            if (decktext.toLowerCase().includes(card)) {
+                const card_line = decktext.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
                 if (Math.round(countstr) > 1) {
-                    this.active_deck.text = this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) - 1).toString()));
+                    return decktext.replace(card_line, card_line.replace(countstr, (Math.round(countstr) - 1).toString()));
                 }
                 else {
-                    this.active_deck.text = this.active_deck.text.split('\n').filter(line => line !== card_line).join('\n');
+                    return decktext.split('\n').filter(line => line !== card_line).join('\n');
                 }
             }
+            else {
+                return decktext;
+            }
+        },
+        change_deck(changes_obj) {
+            const res = Object.entries(changes_obj).reduce((restext, [card, count]) => {
+                const f_change = (count > 0) ? 'str_add_card' : 'str_remove_card';
+                for (let i = 0; i < Math.abs(count); ++i) {
+                    restext = this[f_change](restext, card);
+                }
+                return restext;
+            }, this.active_deck.text);
+            this.active_deck.text = res;
+        },
+        add_card(card) {
+            this.change_deck({[card]: 1});
+        },
+        remove_card(card) {
+            this.change_deck({[card]: -1});
         },
         is_card(card) {
             return card.toLowerCase() in tcg;
@@ -950,6 +968,17 @@ var app = new Vue({
         deck_cards_to_count() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             const res = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
+            
+            if (this.prev_decks[this.storage.deck_index]) {
+                const keys2zeroes = [...Object.keys(res), ...Object.keys(this.prev_decks[this.storage.deck_index])].map(key => [key, 0])
+                const old_deck = Object.assign(Object.fromEntries(keys2zeroes), this.prev_decks[this.storage.deck_index]);
+                const new_deck = Object.assign(Object.fromEntries(keys2zeroes), res);
+
+                const resres = Object.entries(new_deck).reduce((obj, [name, count]) => (count - old_deck[name] !== 0) ? Object.assign(obj, {[name]: count - old_deck[name]}) : obj, {});
+                console.log("new entry: ", resres);
+                
+            }
+            this.prev_decks[this.storage.deck_index] = JSON.parse(JSON.stringify(res));
             return res;
         },
         decktext_style() {
@@ -973,6 +1002,14 @@ var app = new Vue({
         },
         active_deck() {
             this.decks_filter = "";
+
+            if (!this.storage.decks[this.storage.deck_index].name) {
+                this.storage.decks[this.storage.deck_index].name = '';
+            }
+            if (!this.storage.decks[this.storage.deck_index].text) {
+                this.storage.decks[this.storage.deck_index].text = '';
+            }
+
             return this.storage.decks[this.storage.deck_index];
         },
         show() {
