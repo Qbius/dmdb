@@ -13,6 +13,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
    </head>
 <body>
 <div id="app">
@@ -203,34 +205,20 @@
                         <div class="row">
                             <div class="col-3">
                                 <h3>Draggable 1</h3>
-                                <draggable class="list-group" :list="list1" group="people">
-                                    <div
-                                            v-for="(element, index) in list1"
-                                            :key="element.name"
-                                    >
-                                        {{ element.name }} {{ index }}
-                                    </div>
+                                <draggable class="list-group" group="people" >
+                                    <card v-for="card in zone1" :cardname='card'></card>
                                 </draggable>
                             </div>
 
                             <div class="col-3">
-                                <h3>Draggable 2</h3>
-                                <draggable class="list-group" :list="list2" group="people">
-                                    <div
-                                            class="list-group-item"
-                                            v-for="(element, index) in list2"
-                                            :key="element.name"
-                                    >
-                                        {{ element.name }} {{ index }}
-                                    </div>
+                                <h3>Draggable 1</h3>
+                                <draggable class="list-group" group="people" >
+                                    <card v-for="card in zone2" :cardname='card'></card>
                                 </draggable>
                             </div>
-
-                            <rawDisplayer class="col-3" :value="list1" title="List 1" />
-
-                            <rawDisplayer class="col-3" :value="list2" title="List 2" />
                         </div>
-                    <card cardname='aqua hulcus'></card>
+
+
                 </div>
             </div>
         </div>

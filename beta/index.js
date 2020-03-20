@@ -563,7 +563,7 @@ Vue.component('card', {
     props: ['cardname'],
     data() {
         return{
-            image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + this.cardname + '.jpg',
+            image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + this.cardname.name + '.jpg',
             card_style: {}
         }
     },
@@ -723,12 +723,17 @@ var app = new Vue({
             survivor: (info) => info.race && info.race.indexOf('survivor') !== -1,
         },
 
-        list1: [
-            { name: "John", id: 1 },
-            { name: "Joao", id: 2 },
-            { name: "Jean", id: 3 },
-            { name: "Gerard", id: 4 }
+        zone1: [
+            { name: "aqua hulcus"},
+            { name: "crystal lancer"},
+            { name: "bolshack dragon" }
         ],
+        zone2: [
+            { name: "aqua surfer"},
+            { name: "crystal paladin"},
+            { name: "bombazar, dragon of destiny"},
+        ],
+
         list2: [
             { name: "Juan", id: 5 },
             { name: "Edgard", id: 6 },
