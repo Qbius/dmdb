@@ -30,7 +30,7 @@
             <img :src="image"
                 @contextmenu="$event.preventDefault(); change_tap()"
                 ref="card_element"
-                v-style = "card_style"
+                style="width: 100px; height: 138px;"
                 v-on:dblclick="$event.preventDefault(); change_cover()"
                 cover = "false">
         </div>
@@ -201,24 +201,25 @@
                         </div>
                     </div>
                 </div>
-                <div id="client-tab" v-show="searchtypemodel === 'test'">
-                        <div class="row">
-                            <div class="col-3">
-                                <h3>Draggable 1</h3>
-                                <draggable class="list-group" group="people" >
-                                    <card v-for="card in zone1" :cardname='card'></card>
-                                </draggable>
-                            </div>
-
-                            <div class="col-3">
-                                <h3>Draggable 1</h3>
-                                <draggable class="list-group" group="people" >
-                                    <card v-for="card in zone2" :cardname='card'></card>
-                                </draggable>
-                            </div>
-                        </div>
-
-
+                <div id="client-tab" style="flex: 1; display: flex; flex-direction: column;" v-show="searchtypemodel === 'test'">
+                    <div style="height: 142px; display: flex;">
+                        <draggable group="people" style="flex: 1; background-color: red; display: flex; flex-direction: row;">
+                            <card v-for="card in battlezone" :cardname='card'></card>
+                        </draggable>
+                    </div>
+                    <div style="height: 142px; display: flex;">
+                        <draggable group="people" style="flex: 1; background-color: yellow; display: flex; flex-direction: row;">
+                            <card v-for="card in shieldzone" :cardname='card'></card>
+                        </draggable>
+                    </div>
+                    <div style="height: 142px; display: flex;">
+                        <draggable group="people" style="flex: 1; background-color: green; display: flex; flex-direction: row;">
+                            <card v-for="card in manazone" :cardname='card'></card>
+                        </draggable>
+                        <draggable group="people" style="width: 104px; background-color: blue; position: relative;">
+                            <card v-for="(card, index) in deckzone" :style="'position: absolute; z-index: ' + index":cardname='card'></card>
+                        </draggable>
+                    </div>
                 </div>
             </div>
         </div>

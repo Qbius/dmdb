@@ -723,23 +723,17 @@ var app = new Vue({
             survivor: (info) => info.race && info.race.indexOf('survivor') !== -1,
         },
 
-        zone1: [
+        battlezone: [],
+        shieldzone: [],
+        manazone: [],
+        deckzone: [
             { name: "aqua hulcus"},
             { name: "crystal lancer"},
-            { name: "bolshack dragon" }
-        ],
-        zone2: [
+            { name: "bolshack dragon" },
             { name: "aqua surfer"},
             { name: "crystal paladin"},
             { name: "bombazar, dragon of destiny"},
         ],
-
-        list2: [
-            { name: "Juan", id: 5 },
-            { name: "Edgard", id: 6 },
-            { name: "Johnson", id: 7 }
-        ],
-
         // v-model variables
         searchtypemodel: 'tcg',
         sorting: {
