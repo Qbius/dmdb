@@ -25,11 +25,11 @@
     <script type="text/x-template" id="card">
         <div class="card-image">
             <img :src="image"
-                 @contextmenu="$event.preventDefault(); change_tap()"
-                 ref="card_element"
-                 v-style = "card_style"
-                 v-on:dblclick="$event.preventDefault(); change_cover()"
-                 cover = "false">
+                @contextmenu="$event.preventDefault(); change_tap()"
+                ref="card_element"
+                v-style = "card_style"
+                v-on:dblclick="$event.preventDefault(); change_cover()"
+                cover = "false">
         </div>
     </script>
     <!--
@@ -102,7 +102,7 @@
             <div id="queries">
 
                 <div id="searchtype">
-                        <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'CARD VIEW', value: 'tcg'}, {text: 'DECK VIEW', value: 'deck'}]" buttons size="sm"></b-form-radio-group>
+                        <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'CARD VIEW', value: 'tcg'}, {text: 'DECK VIEW', value: 'deck'}, {text: 'test', value: 'test'}]" buttons size="sm"></b-form-radio-group>
                 </div>
                 
                 <div id="taggroup" class="query">
@@ -185,11 +185,11 @@
 
         <div id="cards">
             <div id="cards-centered" :style="'width: ' + (cards_per_row * 224 + 2).toString() + 'px;'">
-                <div id="cards-queried" v-show="!show_deck">
+                <div id="cards-queried" v-show="searchtypemodel === 'tcg'">
                     <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                     </div>
                 </div>
-                <div id="decks-tabs" v-show="show_deck">
+                <div id="decks-tabs" v-show="searchtypemodel === 'deck'">
                     <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">          
                     <div id="cards-deck">
                         <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
@@ -197,6 +197,9 @@
                             <!--<div style="position: absolute; z-index: 5; bottom: 32px; left: 24px; width: 174px; height: 72px; background-color: red"></div>-->
                         </div>
                     </div>
+                </div>
+                <div id="client-tab" v-show="searchtypemodel === 'test">
+                    <card cardname='aqua hulcus'></card>
                 </div>
             </div>
         </div>
