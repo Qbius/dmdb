@@ -570,10 +570,6 @@ Vue.component('card', {
 
     //Tap/untap
     methods: {
-        card_image(card) {
-            return (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + card + '.jpg';
-        },
-
         change_tap () {
             let refs = this.$refs.card_element;
             if(this.$refs.card_element.getAttribute("class") == "card-tap") {
@@ -589,7 +585,7 @@ Vue.component('card', {
             console.log("Inside change_cover");
             if(refs.getAttribute("cover") == "false"){
                 console.log("Inside if");
-                refs.setAttribute("src", "dm_images/card_back.png");
+                refs.setAttribute("src", (window.location.href.includes('beta') ? '../' : './') + "dm_images/card_back.png");
                 refs.setAttribute("cover", "true")
             } else {
                 refs.src = this.image;
@@ -598,6 +594,11 @@ Vue.component('card', {
         },
     }
 });
+
+Vue.component('zone', {
+    template: '#zone',
+
+})
 
 const codes = {
     zero: '0'.charCodeAt(0),
