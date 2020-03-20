@@ -558,6 +558,47 @@ Vue.component('totalbadge', {
     }
 });
 
+Vue.component('card', {
+    template: '#card',
+    props: ['cardname'],
+    data() {
+        return{
+            image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + this.cardname + '.jpg',
+            card_style: {}
+        }
+    },
+
+    //Tap/untap
+    methods: {
+        card_image(card) {
+            return (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + card + '.jpg';
+        },
+
+        change_tap () {
+            let refs = this.$refs.card_element;
+            if(this.$refs.card_element.getAttribute("class") == "card-tap") {
+                refs.setAttribute("class", "card-untap");
+            } else {
+                refs.setAttribute("class", "card-tap");
+            }
+        },
+
+        //Cover/uncover
+        change_cover(){
+            let refs = this.$refs.card_element;
+            console.log("Inside change_cover");
+            if(refs.getAttribute("cover") == "false"){
+                console.log("Inside if");
+                refs.setAttribute("src", "dm_images/card_back.png");
+                refs.setAttribute("cover", "true")
+            } else {
+                refs.src = this.image;
+                refs.setAttribute("cover", "false")
+            }
+        },
+    }
+});
+
 const codes = {
     zero: '0'.charCodeAt(0),
     A: 'A'.charCodeAt(0),
