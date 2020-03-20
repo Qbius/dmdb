@@ -146,6 +146,7 @@ html, body, #app {
     position: absolute;
     z-index: 1;
     flex: 1;
+    width: 300px;
     pointer-events: none;
     overflow-y: scroll;
     scrollbar-width: none;
@@ -158,12 +159,14 @@ html, body, #app {
 
 #deckoverlay-container {
     padding-top: 6px;
+    width: 300px;
     display: flex;
     flex-direction: column;
 }
 
 .deckoverlay {
     min-height: 24px;
+    width: 300px;
     height: 24px;
     display: flex;
     padding-right: 5px;
@@ -476,7 +479,13 @@ body, .tab-title, .tab-input {
 .card-image:hover {
     filter: brightness(130%);
 }
+.card-tap {
+    transform: rotate(90deg);
+}
 
+.card-untap {
+    transform: rotate(0deg);
+}
 .decktitle:hover {
     filter: grayscale(100%); 
     filter: brightness(200%);

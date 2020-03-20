@@ -558,6 +558,47 @@ Vue.component('totalbadge', {
     }
 });
 
+Vue.component('card', {
+    template: '#card',
+    props: ['cardname'],
+    data() {
+        return{
+            image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + this.cardname + '.jpg',
+            card_style: {}
+        }
+    },
+
+    //Tap/untap
+    methods: {
+        card_image(card) {
+            return (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + card + '.jpg';
+        },
+
+        change_tap () {
+            let refs = this.$refs.card_element;
+            if(this.$refs.card_element.getAttribute("class") == "card-tap") {
+                refs.setAttribute("class", "card-untap");
+            } else {
+                refs.setAttribute("class", "card-tap");
+            }
+        },
+
+        //Cover/uncover
+        change_cover(){
+            let refs = this.$refs.card_element;
+            console.log("Inside change_cover");
+            if(refs.getAttribute("cover") == "false"){
+                console.log("Inside if");
+                refs.setAttribute("src", "dm_images/card_back.png");
+                refs.setAttribute("cover", "true")
+            } else {
+                refs.src = this.image;
+                refs.setAttribute("cover", "false")
+            }
+        },
+    }
+});
+
 const codes = {
     zero: '0'.charCodeAt(0),
     A: 'A'.charCodeAt(0),
@@ -609,6 +650,7 @@ var app = new Vue({
         searchtypes: [
             {'text': 'TCG', 'value': 'tcg', 'variant': 'secondary', 'size': 'sm', 'conflict': 'deck'},
             {'text': 'DECK', 'value': 'deck', 'variant': 'secondary', 'size': 'sm', 'conflict': 'tcg'},
+            {'text': 'test', 'value': 'test', 'variant': 'secondary', 'size': 'sm'},
         ],
         civs: [
             {'text': 'Fire', 'value': 'fire', 'variant': 'outline-danger', 'size': 'sm'}, 
@@ -928,7 +970,6 @@ var app = new Vue({
 
         let decktextarea = document.getElementById('decktext');
         decktextarea.addEventListener('scroll', () => {
-            console.log('ok');
             document.getElementById("deckoverlay-container-wrapper").scrollTop = Math.min(decktextarea.scrollTop, decktextarea.scrollHeight - decktextarea.clientHeight - 4);
         });
         window.addEventListener('mousemove', this.decktext_hover);
@@ -954,7 +995,7 @@ var app = new Vue({
             return res;
         },
         decktext_style() {
-            return 'width: 300px; height: ' + this.el_property('decktextcontainer', 'height') + ';';
+            return 'height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
         deck_lines() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
@@ -1005,14 +1046,4 @@ var app = new Vue({
 var urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('shared')) {
     app.init_from_deck(urlParams.get('shared'));
-}
-else {
-    setTimeout(() => {
-        let old_name = app.storage.decks[app.storage.decks.length - 1].name;
-        let old_text = app.storage.decks[app.storage.decks.length - 1].text;
-        app.storage.decks[app.storage.decks.length - 1].name = "";
-        app.storage.decks[app.storage.decks.length - 1].text = "";
-        app.storage.decks[app.storage.decks.length - 1].name = old_name;
-        app.storage.decks[app.storage.decks.length - 1].text = old_text;
-    });
 }
