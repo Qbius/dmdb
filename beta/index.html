@@ -21,6 +21,7 @@
     TEMPLATES
     TEMPLATES
 -->
+
 <!-- CARD -->
     <script type="text/x-template" id="card">
         <div class="card-image">
@@ -38,7 +39,7 @@
     <script type='text/x-template' id='tags'>
         <div class="column-container">
             <b-input-group v-for="(row, index) in rows" style="user-select: none;">
-                <b-form-tags input-id="tags-pills" v-model="modelvar.data.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
+                <b-form-tags input-id="tags-pills" v-model="modelvar.data.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/>
                 <b-input-group-append>
                     <b-button @click="addrow(index)" size="sm" :variant="(((index + 1) == rows.length)) ? 'secondary' : 'danger'">{{ (((index + 1) == rows.length)) ? '+' : 'X' }}</b-button>
                 </b-input-group-append>
@@ -104,7 +105,7 @@
                 <div id="searchtype">
                         <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'CARD VIEW', value: 'tcg'}, {text: 'DECK VIEW', value: 'deck'}, {text: 'test', value: 'test'}]" buttons size="sm"></b-form-radio-group>
                 </div>
-                
+
                 <div id="taggroup" class="query">
                     <tags :modelvar="models.tags"></tags>
                 </div>
@@ -120,7 +121,7 @@
 
                 <div class="query">
                     <slider class="sliderman" :modelvar="models.cost" title="COST" :points="cost_points"></slider>
-                
+
                     <slider class="sliderman" :modelvar="models.power" title="POWER" :points="power_points"></slider>
 
                     <slider class="sliderman" :modelvar="models.set" title="SET" :points="set_points"></slider>
@@ -190,7 +191,7 @@
                     </div>
                 </div>
                 <div id="decks-tabs" v-show="searchtypemodel === 'deck'">
-                    <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">          
+                    <input type="file" id="invisiblefileinput" accept=".json" style="display: none;" @change="load_storage()">
                     <div id="cards-deck">
                         <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                             <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
@@ -199,6 +200,36 @@
                     </div>
                 </div>
                 <div id="client-tab" v-show="searchtypemodel === 'test'">
+                        <div class="row">
+                            <div class="col-3">
+                                <h3>Draggable 1</h3>
+                                <draggable class="list-group" :list="list1" group="people">
+                                    <div
+                                            v-for="(element, index) in list1"
+                                            :key="element.name"
+                                    >
+                                        {{ element.name }} {{ index }}
+                                    </div>
+                                </draggable>
+                            </div>
+
+                            <div class="col-3">
+                                <h3>Draggable 2</h3>
+                                <draggable class="list-group" :list="list2" group="people">
+                                    <div
+                                            class="list-group-item"
+                                            v-for="(element, index) in list2"
+                                            :key="element.name"
+                                    >
+                                        {{ element.name }} {{ index }}
+                                    </div>
+                                </draggable>
+                            </div>
+
+                            <rawDisplayer class="col-3" :value="list1" title="List 1" />
+
+                            <rawDisplayer class="col-3" :value="list2" title="List 2" />
+                        </div>
                     <card cardname='aqua hulcus'></card>
                 </div>
             </div>
