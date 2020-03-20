@@ -650,6 +650,7 @@ var app = new Vue({
         searchtypes: [
             {'text': 'TCG', 'value': 'tcg', 'variant': 'secondary', 'size': 'sm', 'conflict': 'deck'},
             {'text': 'DECK', 'value': 'deck', 'variant': 'secondary', 'size': 'sm', 'conflict': 'tcg'},
+            {'text': 'test', 'value': 'test', 'variant': 'secondary', 'size': 'sm'},
         ],
         civs: [
             {'text': 'Fire', 'value': 'fire', 'variant': 'outline-danger', 'size': 'sm'}, 
