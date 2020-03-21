@@ -203,21 +203,21 @@
                 </div>
                 <div id="client-tab" style="flex: 1; display: flex; flex-direction: column;" v-show="searchtypemodel === 'test'">
                     <div style="height: 142px; display: flex;">
-                        <draggable group="people" style="flex: 1; background-color: red; display: flex; flex-direction: row;">
+                        <draggable group="people" style="flex: 1; justify-content: center; background-color: red; display: flex; flex-direction: row;" :list="battlezone">
                             <card v-for="card in battlezone" :cardname='card'></card>
                         </draggable>
                     </div>
                     <div style="height: 142px; display: flex;">
-                        <draggable group="people" style="flex: 1; background-color: yellow; display: flex; flex-direction: row;">
+                        <draggable group="people" style="flex: 1; justify-content: center; background-color: yellow; display: flex; flex-direction: row;" :list="shieldzone">>
                             <card v-for="card in shieldzone" :cardname='card'></card>
                         </draggable>
                     </div>
                     <div style="height: 142px; display: flex;">
-                        <draggable group="people" style="flex: 1; background-color: green; display: flex; flex-direction: row;">
-                            <card v-for="card in manazone" :cardname='card'></card>
+                        <draggable group="people" style="flex: 1; justify-content: center; background-color: green; display: flex; flex-direction: row;" :list="manazone">>
+                            <card v-for="card in manazone" :cardname='card' style="transform: rotate(180deg)"></card>
                         </draggable>
-                        <draggable group="people" style="width: 104px; background-color: blue; position: relative;">
-                            <card v-for="(card, index) in deckzone" :style="'position: absolute; z-index: ' + index":cardname='card'></card>
+                        <draggable group="people" style="width: 104px;justify-content: center;  background-color: blue; position: relative;" :list="deckzone">
+                            <card v-for="(card, index) in deckzone" :style="'margin-left: 8px; margin-right: 8px; position: absolute; z-index: ' + index.toString()" :cardname='card'></card>
                         </draggable>
                     </div>
                 </div>
