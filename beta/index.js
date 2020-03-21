@@ -497,6 +497,10 @@ const special = {
     "doge": (tag, key) => key === "holy awe",
 }
 
+Vue.component('stretch', {
+    template: '#stretch'
+});
+
 Vue.component('tags', {
     template: '#tags',
     props: ['modelvar'],
@@ -560,7 +564,7 @@ Vue.component('totalbadge', {
 
 Vue.component('card', {
     template: '#card',
-    props: ['cardname'],
+    props: ['cardname', 'dndindex'],
     data() {
         return{
             image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + this.cardname.name + '.jpg',
@@ -582,9 +586,7 @@ Vue.component('card', {
         //Cover/uncover
         change_cover(){
             let refs = this.$refs.card_element;
-            console.log("Inside change_cover");
             if(refs.getAttribute("cover") == "false"){
-                console.log("Inside if");
                 refs.setAttribute("src", (window.location.href.includes('beta') ? '../' : './') + "dm_images/card_back.png");
                 refs.setAttribute("cover", "true")
             } else {
@@ -701,6 +703,7 @@ var app = new Vue({
         copied: false,
         copied_msg: "",
         decks_filter: "",
+        divclass: "",
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
         tabedits: {},
         preview: {
@@ -708,6 +711,7 @@ var app = new Vue({
             left: '0px',
             img: ""
         },
+        dragged: {},
         shieldtrigger_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/shieldtrigger.png',
         blocker_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/blocker.png',
         evolutioncreature_icon: (window.location.href.includes('beta') ? '../' : './') + '/icons/evolutioncreature.png',
@@ -723,16 +727,18 @@ var app = new Vue({
             survivor: (info) => info.race && info.race.indexOf('survivor') !== -1,
         },
 
-        battlezone: [],
+        battlezone: [
+            { id: 0, name: "aqua hulcus"},
+            { id: 1, name: "crystal lancer"},
+            { id: 2, name: "bolshack dragon" },
+            { id: 3, name: "aqua surfer"},
+            { id: 4, name: "crystal paladin"},
+            { id: 5, name: "bombazar, dragon of destiny"},
+        ],
         shieldzone: [],
         manazone: [],
         deckzone: [
-            { name: "aqua hulcus"},
-            { name: "crystal lancer"},
-            { name: "bolshack dragon" },
-            { name: "aqua surfer"},
-            { name: "crystal paladin"},
-            { name: "bombazar, dragon of destiny"},
+           
         ],
         // v-model variables
         searchtypemodel: 'tcg',
@@ -974,6 +980,51 @@ var app = new Vue({
                 return res;
             }
         },
+        drag_start(event) {
+            let dndindex = event.srcElement.getAttribute('dnd-index');
+            if (dndindex === undefined) return;
+            dndindex = Math.round(dndindex);
+            let dragimg = document.getElementById('dragimg');
+            dragimg.src = event.srcElement.src;
+            event.dataTransfer.setDragImage(dragimg, event.pageX - event.srcElement.offsetLeft, event.pageY - event.srcElement.offsetTop);
+            event.dataTransfer.setData('image/jpg', '')
+            
+            for (let el of event.path) {
+                let dndmodel = this[el.getAttribute('dnd-model')];
+                if (dndmodel) {
+                    this.dragged = {exists: true, draggedelem: event.srcElement, model: dndmodel, index: dndindex, elem: el, id: dndmodel[dndindex].id, info: JSON.stringify(dndmodel[dndindex]) };
+                    this.$forceUpdate();
+                    return;
+                }
+            }
+        },
+        drag_over(event) {
+            if (this.dragged.exists) {
+                this.dragged.model.splice(this.dragged.index, 1);
+                this.dragged.exists = false;
+            }
+        },
+        drag_enter(event) {
+            let{model: srcmodel, index: srcindex} = this.dragged;
+            if (srcmodel !== undefined && srcindex !== undefined && event.srcElement.getAttribute('dnd-model') !== null) {
+                this.dragged.elem = event.srcElement;
+            }
+        },
+        drag_end(event) {
+            let{model: srcmodel, index: srcindex, elem: dstelem} = this.dragged;
+            if (srcmodel === undefined || srcindex === undefined || dstelem === undefined) return;
+            let dstmodel = this[dstelem.getAttribute('dnd-model')];
+            if (dstmodel) {
+                dstmodel.push(JSON.parse(this.dragged.info));
+                this.dragged = {};
+                this.$forceUpdate();
+                return;
+            }
+            else {
+                console.log(srcmodel);
+                srcmodel.splice(srcindex, 0, JSON.parse(this.dragged.info));
+            }
+        }
     },
     mounted() {
         let decktext = document.getElementById('decktext');
