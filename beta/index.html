@@ -27,17 +27,54 @@
     <!-- 
         CARD 
     -->
+
     <script type="text/x-template" id="card">
-        <div style="display: flex; margin-left: 20px; margin-right: 20px;">
-            <img :src="image"
-                :dnd-index="dndindex"
-                @contextmenu="$event.preventDefault(); change_tap()"
-                ref="card_element"
-                style="width: 100px; height: 138px;"
-                v-on:dblclick="$event.preventDefault(); change_cover()"
-                cover = "false"></img>
+        <div :style="cardstyle + ((divclass === 'pilecard') ? `z-index: ${dndindex}` : 'margin-left: 20px; margin-right: 20px;')" :class="'gamecard-container ' + divclass">
+            <img v-if="cardname !== 'empty'" :style="cardstyle" :src="image" :dnd-index="dndindex" ref="card_element" cover="false" @contextmenu.stop.prevent="change_tap()" v-on:dblclick.stop.prevent="change_cover()"></img>
         </div>
     </script>
+
+    <!--
+        ZONE
+    -->
+    <script type="text/x-template" id="zone">
+        <div @mousemove.stop.prevent="mouse_move($event)" @mousedown.stop.prevent="mouse_down($event)" :style="zonestyle" :class="pile ? 'pile' : 'zone'" :id="zonename" dnd-model="innermodel">
+            <card v-for="(card, index) in innermodel" :key="card.id" :divclass="pile ? 'pilecard' : ((zonename === 'mana-zone') ? 'manacard' : '')" :dndindex="index" :cardname='card'></card>
+        </div>
+    </script>
+
+    <!--
+        GAME
+    -->
+
+    <script type="text/x-template" id="game">
+        <div style="height: 100%; display: flex; flex-direction: column; align-item: stretch;">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start;">
+                <div style="display: flex;">
+                    <zone zonename="deck-zone" :pile="true" :model="deckzone"></zone>
+                    <zone zonename="hand-zone" style="flex: 1;" :model="handzone"></zone>
+                    <zone zonename="graveyard-zone" :pile="true" :model="gravezone"></zone>
+                </div>
+                <zone zonename="mana-zone" :model="manazone"></zone>
+                <zone zonename="shield-zone" :model="shieldzone"></zone>
+                <zone zonename="battle-zone" :model="battlezone"></zone>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                <zone zonename="battle-zone" :model="battlezone" :dragged="dragged"></zone>
+                <zone zonename="shield-zone" :model="shieldzone" :dragged="dragged"></zone>
+                <zone zonename="mana-zone" :model="manazone" :dragged="dragged"></zone>
+                <div style="display: flex;">
+                    <zone zonename="graveyard-zone" :pile="true" :model="gravezone" :dragged="dragged"></zone>
+                    <zone zonename="hand-zone" style="flex: 1;" :model="handzone" :dragged="dragged"></zone>
+                    <zone zonename="deck-zone" :pile="true" :model="deckzone" :dragged="dragged"></zone>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!--
+        TAGS
+    -->
 
     <script type='text/x-template' id='tags'>
         <div class="column-container">
@@ -188,7 +225,7 @@
         </div>
 
         <div id="cards">
-            <div id="cards-centered" :style="'width: ' + (cards_per_row * 224 + 2).toString() + 'px;'">
+            <div v-show="searchtypemodel === 'tcg' || searchtypemodel === 'deck'" id="cards-centered" :style="'width: ' + (cards_per_row * 224 + 2).toString() + 'px;'">
                 <div id="cards-queried" v-show="searchtypemodel === 'tcg'">
                     <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                     </div>
@@ -202,27 +239,9 @@
                         </div>
                     </div>
                 </div>
-                <div @dragstart="drag_start($event)" @drop="drag_end($event)" @dragover.prevent="drag_over($event)" id="client-tab" style="flex: 1; display: flex; flex-direction: column;" v-show="searchtypemodel === 'test'">
-                    <div style="height: 142px; display: flex;">
-                        <div @dragenter="drag_enter($event)" @dragover.prevent="" style="flex: 1; justify-content: center; background-color: red; display: flex; flex-direction: row;" dnd-model="battlezone">
-                            <card v-for="(card, index) in battlezone" :key="card.id" :dndindex="index" :cardname='card'></card>
-                        </div>
-                    </div>
-                    <div style="height: 142px; display: flex;">
-                        <div @dragenter="drag_enter($event)" @dragover.prevent="" style="flex: 1; justify-content: center; background-color: yellow; display: flex; flex-direction: row;" dnd-model="shieldzone">
-                            <card v-for="(card, index) in shieldzone" :key="card.id" :dndindex="index" :cardname='card'></card>
-                        </div>
-                    </div>
-                    <div style="height: 142px; display: flex;">
-                        <div @dragenter="drag_enter($event)" @dragover.prevent="" style="flex: 1; justify-content: center; background-color: green; display: flex; flex-direction: row;" dnd-model="manazone">
-                            <card v-for="(card, index) in manazone" :key="card.id" :dndindex="index" :cardname='card'></card>
-                        </div>
-                        <div @dragenter="drag_enter($event)"  @dragover.prevent="" style="width: 104px;justify-content: center;  background-color: blue; position: relative;" dnd-model="deckzone">
-                            <img id="dragimg" style="position: absolute; left: 0px; top: 0px; width: 100px; height: 138px; background: red; z-index: -1;">
-                            <card v-for="(card, index) in deckzone" :key="card.id" :dndindex="index" :style="'margin-left: 8px; margin-right: 8px; position: absolute; z-index: ' + index.toString()" :cardname='card'></card>
-                        </div>
-                    </div>
-                </div>
+            </div>
+            <div id="client-tab" style="flex: 1;" v-show="searchtypemodel === 'test'">
+                    <game></game>
             </div>
         </div>
         <div id="decklist">
@@ -272,6 +291,7 @@
             <b-button pill variant="secondary" style="margin-left: 5px;" size="sm" @click="rodo_show = false;">Dismiss</b-button>
         </b-alert>
     </div>
+    <img id="dragimg" style="pointer-events: none; position: absolute; left: 0px; top: 0px; background: red; z-index: -1;">
     <img class="popup" style="display: none; pointer-events: none; position: absolute; z-index: 10000; width: 222px; height: 307px; border-radius: 10px;" id="preview-image">
 </div>
 

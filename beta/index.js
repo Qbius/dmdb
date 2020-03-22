@@ -564,11 +564,10 @@ Vue.component('totalbadge', {
 
 Vue.component('card', {
     template: '#card',
-    props: ['cardname', 'dndindex'],
+    props: ['cardname', 'dndindex', 'divclass'],
     data() {
         return{
-            image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + this.cardname.name + '.jpg',
-            card_style: {}
+            image: (window.location.href.includes('beta') ? '../' : './') + 'dm_images/' + (this.alwaysback ? 'card_back' : this.cardname.name) + '.jpg',
         }
     },
 
@@ -587,19 +586,162 @@ Vue.component('card', {
         change_cover(){
             let refs = this.$refs.card_element;
             if(refs.getAttribute("cover") == "false"){
-                refs.setAttribute("src", (window.location.href.includes('beta') ? '../' : './') + "dm_images/card_back.png");
+                refs.setAttribute("src", (window.location.href.includes('beta') ? '../' : './') + "dm_images/card_back.jpg");
                 refs.setAttribute("cover", "true")
             } else {
                 refs.src = this.image;
                 refs.setAttribute("cover", "false")
             }
         },
+    },
+    computed: {
+        cardstyle() {
+            const width = Math.floor(document.body.scrollHeight * 100 / 138 / 8) - 7;
+            const height = Math.floor(document.body.scrollHeight / 8) - 9;
+            return `width: ${width}px; height: ${height}px;`;
+        }
     }
 });
 
 Vue.component('zone', {
     template: '#zone',
+    props: ['zonename', 'model', 'dragged', 'pile'],
+    data() {
+        return {
+            innermodel: JSON.parse(JSON.stringify(this.model)),
+        }
+    },
+    watch: {
+        model(new_model, old_model) {
+            this.innermodel = JSON.parse(JSON.stringify(new_model));
+        }
+    },
+    mounted() {
+        console.log(this.pile);
+        document.addEventListener('mouseup', event => {
+            for (let el of event.path) {
+                if (el.__vue__ !== undefined && el.__vue__.mouse_up !== undefined && el.__vue__.dragged !== undefined) {
+                    el.__vue__.mouse_up(event);
+                }
+            }
+        });
+    },
+    methods: {
+        mouse_down(event) {
+            if (this.dragged === undefined) return;
 
+            let dndindex = event.srcElement.getAttribute('dnd-index');
+            if (dndindex === null) return;
+            dndindex = Math.round(dndindex);
+            for (let el of event.path) {
+                let dndmodel = this[el.getAttribute('dnd-model')];
+                if (dndmodel) {
+
+                    let dragimg = document.getElementById('dragimg');
+                    dragimg.src = event.srcElement.src;
+                    dragimg.style.width = `${Math.floor(document.body.scrollHeight * 100 / 138 / 8) - 7}px`;
+                    dragimg.style.height = `${Math.floor(document.body.scrollHeight / 8) - 9}px`;
+
+                    let{top: elem_top, left: elem_left} = event.srcElement.getBoundingClientRect();
+                                 
+                    this.dragged.update_ghost = (x, y) => {
+                        dragimg.style.left = (x - (event.pageX - elem_left)).toString() + 'px';
+                        dragimg.style.top = (y - (event.pageY - elem_top)).toString() + 'px';
+                        dragimg.style['z-index'] = '10000';
+                    };
+                    this.dragged.reset_ghost = () => {
+                        dragimg.style.left = '0px';
+                        dragimg.style.top = '0px';
+                        dragimg.style['z-index'] = '-1';
+                    };
+                    this.dragged.delete_original = () => {
+                        this.model.splice(dndindex, 1);
+                        this.innermodel.splice(dndindex, 1);
+                    };
+                    this.dragged.restore_original = () => {
+                        this.model.splice(dndindex, 0, JSON.parse(this.dragged.info));
+                        this.innermodel.splice(dndindex, 0, JSON.parse(this.dragged.info));
+                    }
+
+                    this.dragged.exists = true;
+                    this.dragged.draggedelem = event.srcElement;
+                    this.dragged.model = dndmodel;
+                    this.dragged.index = dndindex;
+                    this.dragged.elem = el;
+                    this.dragged.id = dndmodel[dndindex].id;
+                    this.dragged.info = JSON.stringify(dndmodel[dndindex]);
+                    return;
+                }
+            }
+        },
+        mouse_move(event) {
+            if (this.dragged === undefined) return;
+
+            if (Object.keys(this.dragged).length > 0) {
+                if (this.dragged.exists) {
+                    this.dragged.delete_original();
+                    this.dragged.exists = false;
+                }
+                this.dragged.update_ghost(event.pageX, event.pageY);
+            }
+        },
+        mouse_up(event) {
+            if (this.dragged === undefined) return;
+
+            if (Object.keys(this.dragged).length > 0 && !this.dragged.exists) {
+                this.dragged.reset_ghost();
+                for (let el of event.path) {
+                    if (el.getAttribute && el.getAttribute('dnd-model') !== null) {
+                        this.innermodel.push(JSON.parse(this.dragged.info));
+                        this.model.push(JSON.parse(this.dragged.info));
+                        Object.keys(this.dragged).forEach(key => delete this.dragged[key]);
+                        return
+                    }
+                }
+                this.dragged.restore_original();
+            }
+            Object.keys(this.dragged).forEach(key => delete this.dragged[key]);
+        },
+    },
+    computed: {
+        zonestyle() {
+            let res = `height: ${Math.floor(document.body.scrollHeight / 8) - 1}px;`;
+            if (this.pile) res += ` width: ${Math.floor(document.body.scrollHeight * 100 / 138 / 8)}px;`;
+            return res;
+        }
+    }
+});
+
+Vue.component('game', {
+    template: '#game',
+    data() {
+        return {
+            dragged: {},
+            battlezone: [
+                { id: 0, name: "aqua hulcus"},
+                { id: 1, name: "crystal lancer"},
+                { id: 2, name: "bolshack dragon" },
+                { id: 3, name: "aqua surfer"},
+                { id: 4, name: "crystal paladin"},
+                { id: 5, name: "bombazar, dragon of destiny"},
+            ],
+            shieldzone: [],
+            manazone: [],
+            gravezone: [],
+            handzone: [],
+            deckzone: [],
+        }
+    },
+    methods: {
+        mouse_left() {
+            if (Object.keys(this.dragged).length > 0) {
+                let{model: srcmodel, index: srcindex} = this.dragged;
+                srcmodel.splice(srcindex, 0, JSON.parse(this.dragged.info));
+                this.dragged.reset_ghost();
+                Object.keys(this.dragged).forEach(key => delete this.dragged[key]);
+            }
+        }
+    }
 })
 
 const codes = {
@@ -727,19 +869,6 @@ var app = new Vue({
             survivor: (info) => info.race && info.race.indexOf('survivor') !== -1,
         },
 
-        battlezone: [
-            { id: 0, name: "aqua hulcus"},
-            { id: 1, name: "crystal lancer"},
-            { id: 2, name: "bolshack dragon" },
-            { id: 3, name: "aqua surfer"},
-            { id: 4, name: "crystal paladin"},
-            { id: 5, name: "bombazar, dragon of destiny"},
-        ],
-        shieldzone: [],
-        manazone: [],
-        deckzone: [
-           
-        ],
         // v-model variables
         searchtypemodel: 'tcg',
         sorting: {
@@ -980,51 +1109,6 @@ var app = new Vue({
                 return res;
             }
         },
-        drag_start(event) {
-            let dndindex = event.srcElement.getAttribute('dnd-index');
-            if (dndindex === undefined) return;
-            dndindex = Math.round(dndindex);
-            let dragimg = document.getElementById('dragimg');
-            dragimg.src = event.srcElement.src;
-            event.dataTransfer.setDragImage(dragimg, event.pageX - event.srcElement.offsetLeft, event.pageY - event.srcElement.offsetTop);
-            event.dataTransfer.setData('image/jpg', '')
-            
-            for (let el of event.path) {
-                let dndmodel = this[el.getAttribute('dnd-model')];
-                if (dndmodel) {
-                    this.dragged = {exists: true, draggedelem: event.srcElement, model: dndmodel, index: dndindex, elem: el, id: dndmodel[dndindex].id, info: JSON.stringify(dndmodel[dndindex]) };
-                    this.$forceUpdate();
-                    return;
-                }
-            }
-        },
-        drag_over(event) {
-            if (this.dragged.exists) {
-                this.dragged.model.splice(this.dragged.index, 1);
-                this.dragged.exists = false;
-            }
-        },
-        drag_enter(event) {
-            let{model: srcmodel, index: srcindex} = this.dragged;
-            if (srcmodel !== undefined && srcindex !== undefined && event.srcElement.getAttribute('dnd-model') !== null) {
-                this.dragged.elem = event.srcElement;
-            }
-        },
-        drag_end(event) {
-            let{model: srcmodel, index: srcindex, elem: dstelem} = this.dragged;
-            if (srcmodel === undefined || srcindex === undefined || dstelem === undefined) return;
-            let dstmodel = this[dstelem.getAttribute('dnd-model')];
-            if (dstmodel) {
-                dstmodel.push(JSON.parse(this.dragged.info));
-                this.dragged = {};
-                this.$forceUpdate();
-                return;
-            }
-            else {
-                console.log(srcmodel);
-                srcmodel.splice(srcindex, 0, JSON.parse(this.dragged.info));
-            }
-        }
     },
     mounted() {
         let decktext = document.getElementById('decktext');
