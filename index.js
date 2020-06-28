@@ -800,9 +800,10 @@ var app = new Vue({
                 let decktext = document.getElementById("decktext");
                 decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
             }
+            this.draft_refresh();
         },
         remove_card(card) {
-            if (this.active_deck.text.toLowerCase().includes(card)) {
+            if (this.active_deck.text.toLowerCase().includes(card) && !('draft' in this.active_deck)) {
                 const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
                 if (Math.round(countstr) > 1) {
@@ -815,6 +816,40 @@ var app = new Vue({
         },
         is_card(card) {
             return card.toLowerCase() in tcg;
+        },
+        init_draft() {
+            this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(Object.keys(tcg), [this.different_civs])});
+            this.storage.deck_index = this.storage.decks.length - 1;
+            this.searchtypemodel = 'tcg';
+        },
+        draft_refresh() {
+            if (!('draft' in this.active_deck)) {
+                return;
+            }
+            else if (this.deck_count < 2) {
+                this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts)[this.storage.deck_index][0])), [this.different_civs]);
+            }
+            else if (this.deck_count < 40) {
+                this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.every(civ => Object.keys(this.decks_civ_counts[this.storage.deck_index]).indexOf(civ) !== -1)), []);
+            }
+            else {
+                delete this.active_deck.draft;
+                this.searchtypemodel = 'deck';
+            }
+        },
+        different_civs(chosen_card, chosen) {
+            return Array.from(chosen).every(card => tcg[chosen_card].civilization.every(civ => tcg[card].civilization.indexOf(civ) === -1));
+        },
+        get_draft_cards(from, test_fs) {
+            let chosen = new Set();
+            while (chosen.size < 3) {
+                let chosen_card = from[Math.floor(Math.random() * from.length)];
+                if (test_fs.every(test_f => test_f(chosen_card, chosen))) {
+                    chosen.add(chosen_card);
+                }
+            }
+            let[first, second, third] = Array.from(chosen);
+            return [tcg[first].name, tcg[second].name, tcg[third].name];
         },
         decktext_hover({srcElement: el, layerY: offset, pageX: x, pageY: y}) {
             const index = Math.floor((offset + document.getElementById('decktext').scrollTop) / 24);
@@ -986,7 +1021,10 @@ var app = new Vue({
             }, 250);
 
             const modified_models = Object.values(this.models).filter(model => model.modified);
-            return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: modified_models.every(model => model.test(tcg[card]))}), {});
+            const draft_f = card => this.active_deck.draft.indexOf(tcg[card].name) !== -1;
+            const standard_f = card => modified_models.every(model => model.test(tcg[card]));
+            const test_f = ('draft' in this.active_deck && this.searchtypemodel === 'tcg') ? draft_f : standard_f;
+            return this.cards.reduce((obj, card) => Object.assign(obj, {[card]: test_f(card)}), {});
         },
         deck_list_options() {
             return this.storage.decks.map(({name: deckname}, index) => ({text: deckname ? deckname : 'Deck ' + (index + 1).toString(), value: index})).filter(({text: deckname}) => !this.decks_filter || deckname.toLowerCase().includes(this.decks_filter.toLowerCase()));
@@ -994,6 +1032,9 @@ var app = new Vue({
         decks_civ_counts() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce((outer_obj, [count, card]) => Object.assign(outer_obj, tcg[card].civilization.reduce((inner_obj, civ) => Object.assign(inner_obj, {[civ]: count + (outer_obj[civ] ? outer_obj[civ] : 0)}), {})), {}));
+        },
+        deck_count() {
+            return Object.values(this.deck_cards_to_count).reduce((sum, ele) => sum + ele, 0);
         },
         spells_counts() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
