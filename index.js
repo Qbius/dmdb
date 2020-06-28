@@ -825,7 +825,7 @@ var app = new Vue({
         },
         draft_base_cards() {
             let tiers = [OU, UU, RU, PU];
-            return tiers[Math.floor(Math.random() * tiers.length)];
+            return tiers[Math.floor(Math.random() * tiers.length)].filter(card => !(card in this.deck_cards_to_count) || this.deck_cards_to_count[card] < 4);
         },
         init_draft() {
             this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(this.draft_base_cards(), [this.different_civs])});
