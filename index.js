@@ -790,7 +790,10 @@ var app = new Vue({
             this.storage.decks.splice(deleted_index, 1);
         },
         add_card(card) {
-            if (this.active_deck.text.toLowerCase().includes(card)) {
+            if (this.active_deck.draft && this.searchtypemodel !== 'tcg') {
+                return;
+            }
+            else if (this.active_deck.text.toLowerCase().includes(card)) {
                 const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
                 this.active_deck.text = Math.round(countstr) >= 4? this.active_deck.text : this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
@@ -820,6 +823,7 @@ var app = new Vue({
         init_draft() {
             this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(Object.keys(tcg), [this.different_civs])});
             this.storage.deck_index = this.storage.decks.length - 1;
+            this.reset();
             this.searchtypemodel = 'tcg';
         },
         draft_refresh() {
