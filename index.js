@@ -827,7 +827,7 @@ var app = new Vue({
                 return;
             }
             else if (this.deck_count < 2) {
-                this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts)[this.storage.deck_index][0])), [this.different_civs]);
+                this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts[this.storage.deck_index])[0])), [this.different_civs]);
             }
             else if (this.deck_count < 40) {
                 this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.every(civ => Object.keys(this.decks_civ_counts[this.storage.deck_index]).indexOf(civ) !== -1)), []);
