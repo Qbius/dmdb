@@ -227,6 +227,18 @@
                         <template v-slot:title>
                             <strong><font color="#6c757d">STATS</font></strong>
                         </template>
+                        <div style="display: flex; flex-direction: column;">
+                            <div v-for="cost in 13" style="display: flex;">
+                                <div style="width: 30px; display: flex; justify-content: flex-end;">
+                                    <span style="margin: 3px; font-family: Lucida Sans Unicode, Lucida Grande, sans-serif"><b>{{ cost }}</b></span>
+                                </div>
+                                <div style="flex: 1; display: flex; align-items: center; margin-left: 5px; margin-right: 5px;">
+                                    <div style="height: 10px; background-color: rgb(93, 65, 218);" :style="`flex: ${cost_counts[cost]}`"></div>
+                                    <span style="margin-left: 2px; margin-right: 2px; font-size: 10px;" color="rgb(93, 65, 218)"><b>{{ cost_counts[cost] }}</b></span>
+                                    <div style="height: 10px;" :style="`flex: ${mode_cost_count - cost_counts[cost]}`"></div>
+                                </div>
+                            </div>
+                        </div>
                     </b-tab>
                 </b-tabs>
             </div>

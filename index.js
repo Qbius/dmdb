@@ -1050,6 +1050,16 @@ var app = new Vue({
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             return this.storage.decks.map(({text: decktext}) => decktext.split('\n').map(line => line.trim().toLowerCase()).filter(line => line.length !== 0).map(cardsplit).filter(([_, card]) => card in tcg).reduce(([spelltotal, total], [count, card]) => [spelltotal + ((tcg[card]['card type'] === 'spell') ? count : 0), total + count], [0, 0])).map(([spelltotal, total]) => (total > 0) ? spelltotal / total : 0);
         },
+        cost_counts() {
+            let base = [...Array(13).keys()].reduce((res, i) => Object.assign(res, {[i + 1]: 0}), {});
+            return Object.entries(this.deck_cards_to_count).reduce((res, [name, count]) => Object.assign(res, {[tcg[name]['mana cost']]: res[tcg[name]['mana cost']] + count}), base);
+        },
+        mode_cost() {
+            return Number(Object.entries(this.cost_counts).find(([cost, count]) => count === this.mode_cost_count)[0]);
+        },
+        mode_cost_count() {
+            return Math.max(...Object.values(this.cost_counts));
+        },
     }
 });
 
