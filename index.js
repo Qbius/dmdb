@@ -387,6 +387,9 @@ const RU = [
     "peppi pepper",
 ];
 
+const nPU = [...Ubers, ...OU, ...UU, ...RU];
+const PU = Object.keys(tcg).filter(card => nPU.indexOf(card) === -1);
+
 const ratuj = [
     "aqua skydiver",
     "aqua surfer",
@@ -820,8 +823,12 @@ var app = new Vue({
         is_card(card) {
             return card.toLowerCase() in tcg;
         },
+        draft_base_cards() {
+            let tiers = [OU, UU, RU, PU];
+            return tiers[Math.floor(Math.random() * tiers.length)];
+        },
         init_draft() {
-            this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(Object.keys(tcg), [this.different_civs])});
+            this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(this.draft_base_cards(), [this.different_civs])});
             this.storage.deck_index = this.storage.decks.length - 1;
             this.reset();
             this.searchtypemodel = 'tcg';
@@ -831,10 +838,10 @@ var app = new Vue({
                 return;
             }
             else if (this.deck_count < 2) {
-                this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts[this.storage.deck_index])[0])), [this.different_civs]);
+                this.active_deck.draft = this.get_draft_cards(this.draft_base_cards().filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts[this.storage.deck_index])[0])), [this.different_civs]);
             }
             else if (this.deck_count < 40) {
-                this.active_deck.draft = this.get_draft_cards(Object.keys(tcg).filter(card => tcg[card].civilization.every(civ => Object.keys(this.decks_civ_counts[this.storage.deck_index]).indexOf(civ) !== -1)), []);
+                this.active_deck.draft = this.get_draft_cards(this.draft_base_cards().filter(card => tcg[card].civilization.every(civ => Object.keys(this.decks_civ_counts[this.storage.deck_index]).indexOf(civ) !== -1)), []);
             }
             else {
                 delete this.active_deck.draft;
@@ -842,18 +849,17 @@ var app = new Vue({
             }
         },
         different_civs(chosen_card, chosen) {
-            return Array.from(chosen).every(card => tcg[chosen_card].civilization.every(civ => tcg[card].civilization.indexOf(civ) === -1));
+            return Array.from(chosen).every(card => tcg[chosen_card].civilization.some(civ => tcg[card].civilization.indexOf(civ) === -1));
         },
         get_draft_cards(from, test_fs) {
             let chosen = new Set();
-            while (chosen.size < 3) {
+            while (chosen.size < 5) {
                 let chosen_card = from[Math.floor(Math.random() * from.length)];
                 if (test_fs.every(test_f => test_f(chosen_card, chosen))) {
                     chosen.add(chosen_card);
                 }
             }
-            let[first, second, third] = Array.from(chosen);
-            return [tcg[first].name, tcg[second].name, tcg[third].name];
+            return Array.from(chosen).map(card => tcg[card].name);
         },
         decktext_hover({srcElement: el, layerY: offset, pageX: x, pageY: y}) {
             const index = Math.floor((offset + document.getElementById('decktext').scrollTop) / 24);
