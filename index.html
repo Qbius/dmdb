@@ -193,7 +193,7 @@
                     <div style="margin-bottom: 25px; display: flex; flex-wrap: wrap;">
                         <div v-for="rocard in Object.keys(diff_cards)" class="card-container" style="width: 111px; height: 154px;">
                             <img v-show="show[rocard]" style="width: 111px; height: 154px;" class="card-image" style="position: absolute; top: 0px; z-index: 0;" class="card-image" :alt="rocard" :src="card_image(rocard)">
-                            <div style="position: absolute; z-index: 5; top: 0px; width: 111px; height: 154px; display: flex; justify-content: center;"><b><span style="-webkit-text-stroke-width: 2px; -webkit-text-stroke-color: black; margin: auto; color: white; font-size: 72px;">{{ -diff_cards[rocard] }}</span></b></div>
+                            <div style="position: absolute; z-index: 5; top: 0px; width: 111px; height: 154px; display: flex; justify-content: center;"><b><span style="-webkit-text-stroke-width: 2px; -webkit-text-stroke-color: white; margin: auto; color: black; font-size: 72px;">{{ ((diff_cards[rocard] < 0) ? '+' : '') + `${-diff_cards[rocard]}` }}</span></b></div>
                         </div>
                     </div>
                     <div style="display: flex;">
