@@ -176,7 +176,7 @@
 
         <div id="cards">
             <div id="cards-centered" :style="'width: ' + (cards_per_row * 224 + 2).toString() + 'px;'">
-                <div id="cards-queried" v-show="!show_deck">
+                <div id="cards-queried" v-show="!show_deck && !show_diff">
                     <div class="card-container" v-for="(card, index) in cards" :key="card" :id="'card' + index.toString()" v-show="show[card]" :card="card" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                     </div>
                 </div>
@@ -186,6 +186,28 @@
                         <div class="card-container" v-for="card in deck_cards" :key="card" :style="'width: 222px; height: ' + (307 + 20 * (Math.min(deck_cards_to_count[card], 4) - 1)) + 'px'" v-on:click="add_card(card)" @contextmenu="$event.preventDefault(); remove_card(card)">
                             <img v-show="show[card]" class="card-image" v-for="i in [...Array(Math.min(deck_cards_to_count[card], 4)).keys()]" :style="'position: absolute; top: ' + (20 * i) + 'px; z-index: ' + i" class="card-image" :alt="card" :src="card_image(card)">
                             <!--<div style="position: absolute; z-index: 5; bottom: 32px; left: 24px; width: 174px; height: 72px; background-color: red"></div>-->
+                        </div>
+                    </div>
+                </div>
+                <div id="decks-diff" style="display: flex; flex-direction: column;" v-show="show_diff">
+                    <div style="margin-bottom: 25px; display: flex; flex-wrap: wrap;">
+                        <div v-for="rocard in Object.keys(diff_cards)" class="card-container" style="width: 111px; height: 154px;">
+                            <img v-show="show[rocard]" style="width: 111px; height: 154px;" class="card-image" style="position: absolute; top: 0px; z-index: 0;" class="card-image" :alt="rocard" :src="card_image(rocard)">
+                            <div style="position: absolute; z-index: 5; top: 0px; width: 111px; height: 154px; display: flex; justify-content: center;"><b><span style="-webkit-text-stroke-width: 2px; -webkit-text-stroke-color: black; margin: auto; color: white; font-size: 72px;">{{ -diff_cards[rocard] }}</span></b></div>
+                        </div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="display: flex; flex-direction: column; flex: 1;">
+                            <div id="cards-deck">
+                                <div class="card-container" v-for="deckcard in deck_cards" :key="deckcard" :style="'width: 111px; height: ' + (154 + 10 * (Math.min(deck_cards_to_count[deckcard], 4) - 1)) + 'px'" v-on:click="add_card(deckcard, active_deck)" @contextmenu="$event.preventDefault(); remove_card(deckcard, active_deck)">
+                                    <img v-show="show[deckcard]" class="card-image" style="width: 111px; height: 154px;" v-for="i in [...Array(Math.min(deck_cards_to_count[deckcard], 4)).keys()]" :style="'position: absolute; top: ' + (10 * i) + 'px; z-index: ' + i" :alt="deckcard" :src="card_image(deckcard)">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="cards-deck" style="flex: 1;">
+                            <div class="card-container" v-for="diffcard in Object.keys(diff_deck_cards_to_count)" :key="diffcard" :style="'width: 111px; height: ' + (154 + 10 * (Math.min(diff_deck_cards_to_count[diffcard], 4) - 1)) + 'px'" v-on:click="add_card(diffcard, diff_deck)" @contextmenu="$event.preventDefault(); remove_card(diffcard, diff_deck)">
+                                <img v-show="show[diffcard]" class="card-image" style="width: 111px; height: 154px;" v-for="i in [...Array(Math.min(diff_deck_cards_to_count[diffcard], 4)).keys()]" :style="'position: absolute; top: ' + (10 * i) + 'px; z-index: ' + i" :alt="diffcard" :src="card_image(diffcard)">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -210,7 +232,7 @@
                             <strong><font color="#6c757d">DECKS</font></strong>
                         </template>
                         <div style="display: flex; flex-direction: column;">
-                            <div v-for="(deck, index) in storage.decks" v-show="deck.name.toLowerCase().includes(decks_filter.toLowerCase())" @click="storage.deck_index = index;" class="decktitle" :style="((storage.deck_index === index) ? 'border: 6px solid; height: 46px;' : 'margin: 6px; margin-top: 3px; margin-bottom: 3px; height: 40px; ') + 'border-color: #6c757d; display: flex; justify-content: center; background-image: linear-gradient(' + Math.round(90 * spells_counts[index] + 90).toString() + 'deg, ' + gradient_from_civs(decks_civ_counts[index]) + ')'">                   
+                            <div v-for="(deck, index) in storage.decks" v-show="deck.name.toLowerCase().includes(decks_filter.toLowerCase())" @click="storage.deck_index = index;" @mouseDown.middle="diff_deck_internal = deck" class="decktitle" :style="((storage.deck_index === index) ? 'border: 6px solid; height: 46px;' : 'margin: 6px; margin-top: 3px; margin-bottom: 3px; height: 40px; ') + 'border-color: #6c757d; display: flex; justify-content: center; background-image: linear-gradient(' + Math.round(90 * spells_counts[index] + 90).toString() + 'deg, ' + gradient_from_civs(decks_civ_counts[index]) + ')'">                   
                                 <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;"> 
                                     <i style="margin-left: 5px; color: white;" v-show="deck.draft" class="material-icons md-18 md-light">view_carousel</i> 
                                 </div>

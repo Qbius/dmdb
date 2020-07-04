@@ -662,6 +662,7 @@ var app = new Vue({
         copied_msg: "",
         decks_filter: "",
         storage: localStorage.dmdb ? JSON.parse(localStorage.dmdb) : {deck_index: 0, decks: [{name: '', text: ''}]},
+        diff_deck_internal: {},
         tabedits: {},
         preview: {
             top: '0px',
@@ -735,7 +736,7 @@ var app = new Vue({
         deck: {text: ""},
     },
     watch: {
-        searchtypemodel: function(newType, oldType) { this.reset(); }
+        searchtypemodel: function(newType, oldType) { this.reset(); this.diff_deck_internal = {}; }
     },
     methods: {
         reset() {
@@ -792,31 +793,31 @@ var app = new Vue({
             }
             this.storage.decks.splice(deleted_index, 1);
         },
-        add_card(card) {
-            if (this.active_deck.draft && this.searchtypemodel !== 'tcg') {
+        add_card(card, deck) {
+            if (deck.draft && this.searchtypemodel !== 'tcg') {
                 return;
             }
-            else if (this.active_deck.text.toLowerCase().includes(card)) {
-                const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
+            else if (deck.text.toLowerCase().includes(card)) {
+                const card_line = deck.text.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
-                this.active_deck.text = Math.round(countstr) >= 4? this.active_deck.text : this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
+                deck.text = Math.round(countstr) >= 4? deck.text : deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) + 1).toString()));
             }
             else {
-                this.active_deck.text = (this.active_deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (this.active_deck.text + '\n1x ' + tcg[card].name);
+                deck.text = (deck.text.trim().length === 0) ? ('1x ' + tcg[card].name) : (deck.text + '\n1x ' + tcg[card].name);
                 let decktext = document.getElementById("decktext");
                 decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
             }
             this.draft_refresh();
         },
-        remove_card(card) {
-            if (this.active_deck.text.toLowerCase().includes(card) && !('draft' in this.active_deck)) {
-                const card_line = this.active_deck.text.split('\n').find(line => line.toLowerCase().includes(card));
+        remove_card(card, deck) {
+            if (deck.text.toLowerCase().includes(card) && !('draft' in deck)) {
+                const card_line = deck.text.split('\n').find(line => line.toLowerCase().includes(card));
                 const countstr = card_line.trim().substring(0, card_line.trim().search(/[^\d]/));
                 if (Math.round(countstr) > 1) {
-                    this.active_deck.text = this.active_deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) - 1).toString()));
+                    deck.text = deck.text.replace(card_line, card_line.replace(countstr, (Math.round(countstr) - 1).toString()));
                 }
                 else {
-                    this.active_deck.text = this.active_deck.text.split('\n').filter(line => line !== card_line).join('\n');
+                    deck.text = deck.text.split('\n').filter(line => line !== card_line).join('\n');
                 }
             }
         },
@@ -828,7 +829,7 @@ var app = new Vue({
             return tiers[Math.floor(Math.random() * tiers.length)].filter(card => !(card in this.deck_cards_to_count) || this.deck_cards_to_count[card] < 4);
         },
         init_draft() {
-            this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(this.draft_base_cards(), [this.different_civs])});
+            this.storage.decks.push({name: '', text: '', draft: this.get_draft_cards(OU, [this.different_civs])});
             this.storage.deck_index = this.storage.decks.length - 1;
             this.reset();
             this.searchtypemodel = 'tcg';
@@ -838,7 +839,7 @@ var app = new Vue({
                 return;
             }
             else if (this.deck_count < 2) {
-                this.active_deck.draft = this.get_draft_cards(this.draft_base_cards().filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts[this.storage.deck_index])[0])), [this.different_civs]);
+                this.active_deck.draft = this.get_draft_cards(OU.filter(card => tcg[card].civilization.some(civ => civ !== Object.keys(this.decks_civ_counts[this.storage.deck_index])[0])), [this.different_civs]);
             }
             else if (this.deck_count < 50) {
                 this.active_deck.draft = this.get_draft_cards(this.draft_base_cards().filter(card => tcg[card].civilization.every(civ => Object.keys(this.decks_civ_counts[this.storage.deck_index]).indexOf(civ) !== -1)), []);
@@ -1001,6 +1002,23 @@ var app = new Vue({
         decktext_style() {
             return 'width: 300px; height: ' + this.el_property('decktextcontainer', 'height') + ';';
         },
+        diff_deck_cards_to_count() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            const res = this.diff_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
+            return res;
+        },
+        diff_cards() {
+            const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
+            const one = this.active_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
+            const two = this.diff_deck.text.split('\n').map(line => line.trim()).filter(line => line.length !== 0).map(cardsplit).reduce((obj, [count, name]) => (name.toLowerCase() in tcg) ? Object.assign(obj, {[name.toLowerCase()]: count}) : obj, {});
+              
+            const keys2zeroes = [...Object.keys(one), ...Object.keys(two)].map(key => [key, 0])
+            const one_deck = Object.assign(Object.fromEntries(keys2zeroes), one);
+            const two_deck = Object.assign(Object.fromEntries(keys2zeroes), two);
+
+            const resres = Object.entries(one_deck).reduce((obj, [name, count]) => (count - two_deck[name] !== 0) ? Object.assign(obj, {[name]: count - two_deck[name]}) : obj, {});
+            return resres;
+        },
         deck_lines() {
             const cardsplit = card => [Math.round(card.substring(0, card.search(' ')).substring(0, card.search(/[^\d]/))), card.substring(card.search(' ')).trim()];
             return this.active_deck.text.split('\n').map(cardsplit);
@@ -1009,16 +1027,26 @@ var app = new Vue({
             return Object.keys(tcg).sort(this.sorting.function[this.sorting.type]);
         },
         deck_cards() {
-            if (localStorage.agree) {
-                localStorage.dmdb = JSON.stringify(this.storage);
-            }
             return this.cards.filter(c => this.show[c] && c in this.deck_cards_to_count);
         },
+        diff_deck_cards() {
+            return this.cards.filter(c => this.show[c] && c in this.diff_deck_cards_to_count);
+        },
+        diff_deck() {
+            let diffd = this.diff_deck_internal;
+            return diffd.text ? diffd : {text: '', name: ''};
+        },
         show_deck() {
-            return this.searchtypemodel === "deck";
+            return this.searchtypemodel === "deck" && !this.show_diff;
+        },
+        show_diff() {
+            return this.diff_deck.text !== '';
         },
         active_deck() {
             this.decks_filter = "";
+            this.diff_deck_interal = {};
+            this.searchtypemodel = 'deck';
+
             return this.storage.decks[this.storage.deck_index];
         },
         show() {
