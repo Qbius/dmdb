@@ -708,11 +708,15 @@ var app = new Vue({
             }
         },
         models: {
-            tags: new Model({rows: [[]]}, ({'name': cardname, 'effect': cardeffe, 'rarity': cardrari, 'race': cardrace}, model) => {
-                const tag_check_f = tag => (tag in special) ? special[tag](tag, cardname.toLowerCase()) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
-                const tag_checking_f = tag => (tag[0] === '!' ? !tag_check_f(tag.split('!').splice(1).join('!')) : tag_check_f(tag));
-                const processed_tags = model.data.rows.filter(row => row.length > 0);
-                return processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
+            // tags: new Model({rows: [[]]}, ({'name': cardname, 'effect': cardeffe, 'rarity': cardrari, 'race': cardrace}, model) => {
+            //     const tag_check_f = tag => (tag in special) ? special[tag](tag, cardname.toLowerCase()) : (cardname.toLowerCase().includes(tag) || (cardrari === tag) || cardeffe.some(eff => eff.includes(tag)) || (cardrace && cardrace.includes(tag)));
+            //     const tag_checking_f = tag => (tag[0] === '!' ? !tag_check_f(tag.split('!').splice(1).join('!')) : tag_check_f(tag));
+            //     const processed_tags = model.data.rows.filter(row => row.length > 0);
+            //     return processed_tags.length === 0 || processed_tags.some(row => row.map(tag => tag.toLowerCase()).every(tag_checking_f));
+            // }),
+            tags: new Model({text: ''}, ({name, effect, rarity, race}, model) => {
+                const lower = model.data.text.toLowerCase();
+                return [name.toLowerCase(), effect, rarity, race].filter(v => v).some(v => v.includes(lower));
             }),
             civ: new Model({fire: false, darkness: false, water: false, light: false, nature: false}, ({'civilization': cardcivs}, model) => {
                 return cardcivs.every(v => model.data[v])
@@ -808,6 +812,12 @@ var app = new Vue({
                 decktext.scrollTop = decktext.scrollHeight - decktext.clientHeight;
             }
             this.draft_refresh();
+        },
+        add_first_card() {
+            const first_shown = this.cards.find(card => this.show[card]);
+            if (first_shown) {
+                this.add_card(first_shown, this.active_deck)
+            }
         },
         remove_card(card, deck) {
             if (deck.text.toLowerCase().includes(card) && !('draft' in deck)) {
@@ -1046,6 +1056,7 @@ var app = new Vue({
             this.decks_filter = "";
             this.diff_deck_interal = {};
             this.searchtypemodel = 'deck';
+            this.$forceUpdate();
 
             return this.storage.decks[this.storage.deck_index];
         },

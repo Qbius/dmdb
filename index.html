@@ -24,16 +24,18 @@
 -->
 
     <!--
-        TAGS
-    -->
-    <script type='text/x-template' id='tags'>
-        <div class="column-container">
-            <b-input-group v-for="(row, index) in rows" style="user-select: none;">
+        <b-input-group v-for="(row, index) in rows" style="user-select: none;">
                 <b-form-tags input-id="tags-pills" v-model="modelvar.data.rows[index]" tag-variant="secondary" tag-pills size="sm" remove-on-delete :placeholder="(row && row.length > 0 ) ? '' : 'Name, race, effect...'"/> 
                 <b-input-group-append>
                     <b-button @click="addrow(index)" size="sm" :variant="(((index + 1) == rows.length)) ? 'secondary' : 'danger'">{{ (((index + 1) == rows.length)) ? '+' : 'X' }}</b-button>
                 </b-input-group-append>
             </b-input-group>
+
+        TAGS
+    -->
+    <script type='text/x-template' id='tags'>
+        <div class="column-container">
+            <input v-model="modelvar.data.text" placeholder="Name, race, effect..."/>
         </div>
     </script>
 
@@ -90,7 +92,7 @@
     <div id="site">
 
         <div id="side">
-            <div id="queries">
+            <div id="queries" v-on:keyup.13="add_first_card();">
 
                 <div id="searchtype">
                         <b-form-radio-group v-model="searchtypemodel" :options="[{text: 'CARD VIEW', value: 'tcg'}, {text: 'DECK VIEW', value: 'deck'}]" buttons size="sm"></b-form-radio-group>
