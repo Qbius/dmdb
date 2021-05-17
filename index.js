@@ -716,7 +716,7 @@ var app = new Vue({
             // }),
             tags: new Model({text: ''}, ({name, effect, rarity, race}, model) => {
                 const lower = model.data.text.toLowerCase();
-                return [name.toLowerCase(), effect, rarity, race].filter(v => v).some(v => v.includes(lower));
+                return [name.toLowerCase(), effect, rarity, race].filter(v => v).some(v => (typeof v === 'string') ? v.includes(lower) : v.some(vv => vv.includes(lower)));
             }),
             civ: new Model({fire: false, darkness: false, water: false, light: false, nature: false}, ({'civilization': cardcivs}, model) => {
                 return cardcivs.every(v => model.data[v])
